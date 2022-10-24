@@ -7,8 +7,14 @@ title: Introduction
 
 This is the tutorial page for your Web3 developer journey. We will be building a simple web3 app that allows you to mint NFTs. We will be covering the following topics:
 
+## [Part 1](/Part1)
 - Setting up your environment
 - Connecting to the Etherdata Blockchain network
+- Creating a wallet
+- Typescript
+- Connect to metamask
+
+## Part 2 (In progress...)
 - Writing smart contracts
 - Compiling smart contracts
 - Deploying smart contracts
