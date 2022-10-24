@@ -35,8 +35,8 @@ const config = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           routeBasePath: "/",
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
+          editUrl:
+            "https://github.com/etherdata-blockchain/msbd5017-docs/edit/main",
         },
         blog: false,
         theme: {
@@ -63,7 +63,7 @@ const config = {
             label: "Tutorial",
           },
           {
-            href: "https://github.com/facebook/docusaurus",
+            href: "https://github.com/etherdata-blockchain/msbd5017-docs",
             label: "GitHub",
             position: "right",
           },
@@ -86,7 +86,7 @@ const config = {
             items: [
               {
                 label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
+                href: "https://discord.gg/mW5S8CEb",
               },
             ],
           },
