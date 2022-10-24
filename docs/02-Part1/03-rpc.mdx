@@ -1,0 +1,49 @@
+---
+title: Connect to the Web3 network
+---
+
+In this class, we provide two endpoints for you to deploy your smart contracts to the 
+etherdata blockchain network.
+
+- Production endpoint: https://rpc.etdchain.net, Chain id: 3101
+- Testnet endpoint: https://rpc.debugchain.net, Chain id: 8348
+
+## Connect to the endpoint using metamask
+
+### Open metamask
+
+follow the diagram below to open metamask and add a custom RPC.
+![metamask](./images/connect1.png)
+
+### Add a custom RPC
+
+![metamask](./images/connect2.png)
+
+```
+Network Name: Etherdata Network
+New RPC URL: https://rpc.etdchain.net
+Chain ID: 3101
+Symbol: ETD
+Block Explorer URL: https://stats.etdchain.net
+```
+
+### Connect to the network
+
+Open your metamask again, and you will see the network you just added.
+
+![metamask](./images/connect3.png)
+
+![metamask](./images/connect4.png)
+
+## Connect to the endpoint using ethers.js
+
+Using the following codesandbox example to connect to the etherdata network.
+
+<iframe src="https://codesandbox.io/embed/web3-connect-0ngc1e?expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark&view=editor"
+     style={{width: "100%", height: "500px", border: "0", borderRadius: "4px", overflow: "hidden"}}
+     title="Web3 connect"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+**Question: How to get the user's balance using ethers.js?**
