@@ -2,8 +2,13 @@
 title: Creating a Web3 Wallet
 order: 0
 ---
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import InstallNodeTerminal from "../../src/components/part1/InstallNodeTerminal";
+import PnpmInitTerminal from "../../src/components/part1/PnpmInitTerminal";
+import NpmInitTerminal from "../../src/components/part1/NpmInitTerminal";
+import YarnInitTerminal from "../../src/components/part1/YarnInitTerminal";
 
 In order to start your web3 journey, you need to create your wallet first either using [MetaMask](https://metamask.io/) or using [ethers.js](https://docs.ethers.io/v5/). We will talk about creating wallet using MetaMask first and then we will talk about creating wallet using ethers.js.
 
@@ -50,20 +55,24 @@ Follow the installation instructions and check the installation by running the f
 ```bash
 node -v
 ```
+
 ![Check node.js installation](./images/ethersjs2.png)
 
 :::tip
 Extra: By default, node.js comes with npm, a node package manager, for installing node packages. However, you can install other advanced package managers like [yarn](https://yarnpkg.com/) or [pnpm](https://pnpm.io/). We will list commands in three different package managers: npm, yarn, and pnpm. You can choose any package manager you want.
 :::
 
-
 ![Yarn](./images/ethersjs3.png)
+
 > Yarn package manager
 
 ![pnpm](./images/ethersjs4.png)
+
 > pnpm package manager
 
 ### Create a node package
+
+<InstallNodeTerminal />
 
 Create a test folder
 
@@ -86,7 +95,7 @@ Create a node package
 npm init -y
 ```
 
-![npm init](./images/ethersjs5.png)
+<NpmInitTerminal />
 
 </TabItem>
 <TabItem value="yarn" label="Yarn">
@@ -95,7 +104,7 @@ npm init -y
 yarn init -y
 ```
 
-![yarn init](./images/ethersjs6.png)
+<YarnInitTerminal />
 
 </TabItem>
 <TabItem value="pnpm" label="Pnpm">
@@ -104,7 +113,7 @@ yarn init -y
 pnpm init
 ```
 
-![pnpm init](./images/ethersjs7.png)
+<PnpmInitTerminal />
 
 </TabItem>
 </Tabs>
@@ -116,9 +125,7 @@ test/
 ├─ package.json
 ```
 
-
 ### Install ethers.js
-
 
 <Tabs>
 <TabItem value="npm" label="Npm">
@@ -152,7 +159,7 @@ test/
 ├─ package.json
 ```
 
-note that node_modules is the folder where all the packages you install are stored. 
+note that node_modules is the folder where all the packages you install are stored.
 You should add node_modules to your .gitignore file and never commit it to your repository.
 
 ### Create a wallet
@@ -248,12 +255,19 @@ Wallet mnemonic {
 
 You can need to open the following code in codesandbox in order to see the output:
 
-<iframe src="https://codesandbox.io/embed/web3-wallet-u80k0s?fontsize=14&hidenavigation=1&theme=dark&view=editor"
-     style={{width: '100%', height: '500px', border: '0', borderRadius: '4px', overflow: 'hidden'}}
-     title="Web3 wallet"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-   ></iframe>
+<iframe
+  src="https://codesandbox.io/embed/web3-wallet-u80k0s?fontsize=14&hidenavigation=1&theme=dark&view=editor"
+  style={{
+    width: "100%",
+    height: "500px",
+    border: "0",
+    borderRadius: "4px",
+    overflow: "hidden",
+  }}
+  title="Web3 wallet"
+  allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+></iframe>
 
 Output in CodeSandbox
 ![codesandbox](./images/ethersjs8.png)
