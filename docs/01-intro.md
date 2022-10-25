@@ -14,7 +14,12 @@ This is the tutorial page for your Web3 developer journey. We will be building a
 - Typescript
 - Connect to metamask
 
-## Part 2 (In progress...)
+## [Part 2](/Part2)
+- Examples using `ethers.js`
+- JSON-RPC introduction
+- Using `ethers.js` with `MetaMask` in React
+
+## Part3(...in progress)
 - Writing smart contracts
 - Compiling smart contracts
 - Deploying smart contracts

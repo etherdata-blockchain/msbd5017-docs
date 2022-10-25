@@ -1,0 +1,169 @@
+---
+title: Ethers JS RPC methods
+---
+
+`ethers.js` provides a number of methods for interacting with the Etherdata Network, and we will
+cover the most common ones in this section.
+
+:::tip
+We will use the mainnet network for this section, but you can use any network you want.
+Check network info in [this section](/Part1/rpc#network-details)
+:::
+
+## RPC methods
+
+### set up
+
+:::tip
+The rest of the docs will be same as the [Introduction in Part1](/Part1/setup#create-a-node-package)
+:::
+
+1. Create a folder for your project, we will use `test` for this example.
+2. Create a file named `index.ts` in the `test` folder.
+3. Run `npm init -y` to create a `package.json` file.
+4. Run `npm install ethers` to install `ethers.js` in your project.
+5. Run `npm install @types/node` to install `@types/node` in your project.
+6. Run `npm install ts-node` to install `ts-node` in your project.
+7. Run `npm install typescript` to install `typescript` in your project.
+8. Run `npx tsc --init` to create a `tsconfig.json` file.
+
+After these steps, your project folder should look like this:
+
+```bash
+test
+├── index.ts
+├── node_modules
+├── package.json
+└── tsconfig.json
+```
+
+```json
+// package.json
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^5.0.24",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.27"
+  }
+}
+```
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "./dist",
+    "allowJs": true,
+    "lib": ["esnext"],
+    "target": "es2017"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "__tests__"]
+}
+```
+
+:::success
+Now you can use `npm start` to run your project.
+:::
+
+### Import ethers
+
+Put the following code in `index.ts`:
+
+```typescript
+import { ethers } from "ethers";
+```
+
+### Get the provider
+
+```typescript
+const provider = new ethers.providers.JsonRpcProvider(
+  "https://rpc.etdchain.net"
+);
+```
+
+### Get the block number
+
+```typescript
+console.log("Current block number", await provider.getBlockNumber());
+```
+
+### Get the latest block
+
+```typescript
+console.log("Latest block", await provider.getBlock("latest"));
+```
+
+### Get the transaction by hash
+
+:::caution
+Replace the `transaction_hash` with your transaction hash.
+:::
+
+```typescript
+console.log("Transaction", await provider.getTransaction("transaction_hash"));
+```
+
+### Get the transaction account by wallet address
+
+:::caution
+Replace `wallet_hash` with your real wallet address.
+:::
+
+```typescript
+console.log(
+  "Total number of transactions by wallet address",
+  await provider.getTransactionCount("wallet_hash")
+);
+```
+
+### Get the balance of an account
+
+```typescript
+const balance = await provider.getBalance("wallet_hash");
+console.log("Balance in wei", balance);
+```
+
+Covert balance in wei to balance in ether
+
+```typescript
+const balanceInEther = ethers.utils.formatEther(balance);
+console.log("Balance in ether", balanceInEther);
+```
+
+### Get the gas price
+
+```typescript
+const gasPrice = await provider.getGasPrice();
+console.log("Gas price in wei", gasPrice);
+```
+
+## Example in CodeSandbox
+
+<iframe
+  src="https://codesandbox.io/embed/ethers-rpc-y45bnw?fontsize=14&hidenavigation=1&theme=dark&view=editor"
+  style={{
+    width: "100%",
+    height: "500px",
+    border: "0",
+    borderRadius: "4px",
+    overflow: "hidden",
+  }}
+  title="ethers rpc"
+  allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+/>

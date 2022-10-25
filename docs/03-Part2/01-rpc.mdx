@@ -1,0 +1,26 @@
+---
+title: Calling JSON RPC API in javascript
+---
+
+In [part1](/Part1/rpc) we used `ethers.js` to get the latest block number from the Etherdata blockchain.
+And now we will use pure `node-fetch` to call the JSON RPC API.
+
+:::info
+`node-fetch` is a light-weight module that brings `window.fetch` to Node.js so that we can make a network request directly in node.
+:::
+
+<iframe
+  src="https://codesandbox.io/embed/jsonrpc-tutorial-bhbd4y?fontsize=14&hidenavigation=1&theme=dark&view=editor"
+  style={{
+    width: "100%",
+    height: "500px",
+    border: "0",
+    borderRadius: "4px",
+    overflow: "hidden",
+  }}
+  title="jsonrpc tutorial"
+  allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+/>
+
+You will get the same result as we did in [part1](/Part1/rpc).
