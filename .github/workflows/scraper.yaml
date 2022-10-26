@@ -1,12 +1,12 @@
 name: Create search index for docs
 # trigger on vercel deployment
 on:
-  deployment_status:
-    types: [success]
+  deployment_status:    
 
 jobs:
   typesense-docsearch-scraper:
     name: Typesense DocSearch Scraper
+    if: github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
