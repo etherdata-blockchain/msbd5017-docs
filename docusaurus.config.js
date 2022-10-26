@@ -105,6 +105,19 @@ const config = {
         darkTheme: darkCodeTheme,
         additionalLanguages: ["solidity"],
       },
+      typesense: {
+        typesenseCollectionName: "msbd5017-docs",
+        typesenseServerConfig: {
+          nodes: [
+            {
+              host: process.env.TYPESCENSE_HOST,
+              port: 443,
+              protocol: "https",
+            },
+          ],
+          apiKey: process.env.TYPESENSE_API_KEY,
+        },
+      },
     }),
 };
 

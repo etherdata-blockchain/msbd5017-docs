@@ -1,5 +1,8 @@
 name: Create search index for docs
-on: push
+# trigger on vercel deployment
+on:
+  deployment_status:
+    types: [success]
 
 jobs:
   typesense-docsearch-scraper:
@@ -18,7 +21,7 @@ jobs:
           echo TYPESENSE_PROTOCOL=${{ secrets.TYPESENSE_PROTOCOL }} >> .env
           cat .env
       - name: Run scraper
-        run: docker run -it --env-file=/path/to/your/.env -e "CONFIG=$(cat /path/to/your/config.json | jq -r tostring)" typesense/docsearch-scraper
+        run: docker run --env-file=.env -e "CONFIG=$(cat ./config.json | jq -r tostring)" typesense/docsearch-scraper
 
       
       
