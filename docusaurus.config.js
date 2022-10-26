@@ -29,7 +29,10 @@ const config = {
     defaultLocale: "en",
     locales: ["en"],
   },
-  themes: ["@docusaurus/theme-live-codeblock"],
+  themes: [
+    "@docusaurus/theme-live-codeblock",
+    "docusaurus-theme-search-typesense",
+  ],
   plugins: ["docusaurus2-dotenv"],
   presets: [
     [
@@ -101,6 +104,19 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
         additionalLanguages: ["solidity"],
+      },
+      typesense: {
+        typesenseCollectionName: "msbd5017-docs",
+        typesenseServerConfig: {
+          nodes: [
+            {
+              host: process.env.TYPESCENSE_HOST,
+              port: 443,
+              protocol: "https",
+            },
+          ],
+          apiKey: process.env.TYPESENSE_API_KEY,
+        },
       },
     }),
 };
