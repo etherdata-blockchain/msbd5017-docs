@@ -19,10 +19,13 @@ This is the tutorial page for your Web3 developer journey. We will be building a
 - JSON-RPC introduction
 - Using `ethers.js` with `MetaMask` in React
 
-## Part3(...in progress)
+## [Part3](/Part3)
 - Writing smart contracts
+- Testing smart contracts
 - Compiling smart contracts
 - Deploying smart contracts
+
+## Part4 (in progress...)
 - Interacting with smart contracts using react
 - Interacting with smart contracts using SwiftUI
 - Interacting with smart contracts using Flutter
