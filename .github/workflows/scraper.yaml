@@ -1,0 +1,25 @@
+name: Create search index for docs
+on: push
+
+jobs:
+  typesense-docsearch-scraper:
+    name: Typesense DocSearch Scraper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: sudo apt-get install jq
+      - name: 'Create env file'
+        run: |
+          touch .env
+          echo TYPESENSE_API_KEY="${{ secrets.TYPESENSE_API_KEY }}" >> .env
+          echo TYPESENSE_HOST=${{ secrets.TYPESENSE_HOST }} >> .env
+          echo TYPESENSE_PORT=${{ secrets.TYPESENSE_PORT }} >> .env
+          echo TYPESENSE_PROTOCOL=${{ secrets.TYPESENSE_PROTOCOL }} >> .env
+          cat .env
+      - name: Run scraper
+        run: docker run -it --env-file=/path/to/your/.env -e "CONFIG=$(cat /path/to/your/config.json | jq -r tostring)" typesense/docsearch-scraper
+
+      
+      
+      

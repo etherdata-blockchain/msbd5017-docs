@@ -29,7 +29,10 @@ const config = {
     defaultLocale: "en",
     locales: ["en"],
   },
-  themes: ["@docusaurus/theme-live-codeblock"],
+  themes: [
+    "@docusaurus/theme-live-codeblock",
+    "docusaurus-theme-search-typesense",
+  ],
   plugins: ["docusaurus2-dotenv"],
   presets: [
     [
