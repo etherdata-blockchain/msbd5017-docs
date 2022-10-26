@@ -25,7 +25,11 @@ This is the tutorial page for your Web3 developer journey. We will be building a
 - Compiling smart contracts
 - Deploying smart contracts
 
-## Chapter4 (in progress...)
+## [Chapter 4](/Chapter4)
+- Using `ethers.js` to send transaction
+- Using `ethers.js` and `MetaMask` to send transaction
+
+## Chapter5 (in progress...)
 - Interacting with smart contracts using react
 - Interacting with smart contracts using SwiftUI
 - Interacting with smart contracts using Flutter

@@ -1,0 +1,109 @@
+---
+title: Preparing transaction using ethers.js and MetaMask
+---
+
+This section is based on the previous section [Preparing transaction using ethers.js and MetaMask](/Chapter4/preparing-transaction).
+We will modify some of the code in the previous section to use `MetaMask` to send the transaction.
+We will also have a interactive React demo.
+
+## Importing the library
+
+First, we need to import the `ethers` library.
+
+```typescript
+import { ethers } from "ethers";
+```
+
+## Creating a provider
+
+We need to create a provider to connect to the network. We will use the
+
+```typescript
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
+const signer = await provider.getSigner();
+```
+
+## Sending the transaction
+
+We will use the `provider` to send the transaction.
+
+```typescript
+const tx = await signer.sendTransaction({
+  to: receiver,
+  value: ethers.utils.parseEther("0.01"),
+});
+```
+
+## Demo
+
+```jsx live
+function WalletApp(props) {
+  // create states
+  const [transactionId, setTransactionId] = useState("");
+  const [receiver, setReceiver] = useState("");
+
+  const onClick = useCallback(async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
+    const tx = await signer.sendTransaction({
+      to: receiver,
+      value: ethers.utils.parseEther("0.01"),
+    });
+
+    setTransactionId(tx.hash);
+  }, [receiver]);
+
+  return (
+    <div>
+      <div>
+        <p>Transaction id: {transactionId}</p>
+      </div>
+      <label>Receiver Address: </label>
+      <input onChange={(e) => setReceiver(e.target.value)} />
+      <button style={{ marginLeft: 10 }} onClick={onClick}>
+        Send transaction
+      </button>
+    </div>
+  );
+}
+```
+
+### Explanation
+
+we have created two states in the above example
+
+```jsx
+const [transactionId, setTransactionId] = useState("");
+const [receiver, setReceiver] = useState("");
+```
+
+We will update `receiver` address when the user enters the address in the input field.
+
+```jsx
+<input onChange={(e) => setReceiver(e.target.value)} />
+```
+
+We will update the `transactionId` when the transaction is sent.
+
+```jsx
+setTransactionId(tx.hash);
+```
+
+We will update onClick function when receiver
+has changed by using `[receiver]` syntax which is also called dependency array.
+
+```jsx {11}
+const onClick = useCallback(async () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  const signer = await provider.getSigner();
+  const tx = await signer.sendTransaction({
+    to: receiver,
+    value: ethers.utils.parseEther("0.01"),
+  });
+
+  setTransactionId(tx.hash);
+}, [receiver]);
+```
