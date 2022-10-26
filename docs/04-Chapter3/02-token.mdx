@@ -2,14 +2,14 @@
 title: Creating a ERC20 token
 ---
 
-import DeployContract from "../../src/components/part3/DeployContract";
+import DeployContract from "../../src/components/Chapter3/DeployContract";
 
 # Creating a ERC20 token
 
 ## Introduction
 
 In this tutorial, we will be creating a ERC20 token using the OpenZeppelin framework and HardHat.
-You should follow [Part 2](/Part2/setup) to setup your environment.
+You should follow [Chapter 2](/Chapter2/setup) to setup your environment.
 
 ## What is ERC20?
 
@@ -48,12 +48,12 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 ```
 
-Keep in mind that since we installed the [OpenZeppelin framework using NPM](/Part3/setup#install-openzeppelin)
+Keep in mind that since we installed the [OpenZeppelin framework using NPM](/Chapter3/setup#install-openzeppelin)
 our solidity compiler will find the `@openzeppelin/contracts/token/ERC20/ERC20.sol` package in the `node_modules` folder.
 If you did not install the `openzeppelin` package, your solidity compiler will raise an error.
 
 :::danger
-Keep in mind that since we installed the [OpenZeppelin framework using NPM](/Part3/setup#install-openzeppelin)
+Keep in mind that since we installed the [OpenZeppelin framework using NPM](/Chapter3/setup#install-openzeppelin)
 our solidity compiler will find the `@openzeppelin/contracts/token/ERC20/ERC20.sol` package in the `node_modules` folder.
 If you did not install the `openzeppelin` package, your solidity compiler will raise an error.
 
@@ -173,7 +173,7 @@ The next line of code is the `const MyToken = await ethers.getContractFactory("M
 which is used to get the contract factory for the `MSBD5017Token` contract.
 
 :::danger
-The contract name must match the [name of the contract](/Part3/token#defining-the-contract) in the `MyToken.sol` file.
+The contract name must match the [name of the contract](/Chapter3/token#defining-the-contract) in the `MyToken.sol` file.
 :::
 
 ```typescript
