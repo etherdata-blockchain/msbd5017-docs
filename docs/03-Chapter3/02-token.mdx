@@ -3,6 +3,7 @@ title: Creating a ERC20 token
 ---
 
 import DeployContract from "../../src/components/Chapter3/DeployContract";
+import TestContract from "../../src/components/Chapter3/TestContract";
 
 # Creating a ERC20 token
 
@@ -22,6 +23,17 @@ you can interact with any other ERC20 token using the same functions and methods
 
 Open the `contracts` folder and create a new file called `MyToken.sol`.
 This is where we will write our smart contract.
+
+```bash {3}
+test/
+├── contracts
+│   ├── MyToken.sol #<--- create this file
+├── scripts
+├── test
+├── hardhat.config.ts
+├── package.json
+├── tsconfig.json
+```
 
 ### Install VSCode extension for Solidity (optional)
 
@@ -119,6 +131,17 @@ contract MSBD5017Token is ERC20 {
 Now we will write a test to test our smart contract.
 Open the `test` folder and create a new file called `MyToken.test.ts`.
 
+```bash {5}
+test/
+├── contracts
+├── scripts
+├── test
+│   ├── MyToken.test.ts #<--- create this file
+├── hardhat.config.ts
+├── package.json
+├── tsconfig.json
+```
+
 ### Defining the dependencies
 
 We will first define the dependencies that we will need for our test.
@@ -214,7 +237,7 @@ Now we will run the test. Open the terminal and run the following command.
 npx hardhat test
 ```
 
-![test result](./images/smart-contact-test-result.png)
+<TestContract />
 
 ## Deploying the contract
 
