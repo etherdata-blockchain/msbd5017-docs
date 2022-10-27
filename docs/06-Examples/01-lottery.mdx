@@ -30,7 +30,7 @@ address payable[] public lotteryHistory;
 - `lotteryId` is the id of the lottery. It will be incremented by 1 after each lottery.
 - `lotteryHistory` is an array of addresses of the winners of the lottery.
 
-### Enter the lottery
+### Entering the lottery
 
 The `enter` function is used to participate in the lottery. The function will be called when a user sends a certain amount of tokens to the lottery system.
 
@@ -42,7 +42,7 @@ function enter() public payable {
 }
 ```
 
-### Pick a winner
+### Picking a winner
 
 The `pickWinner` function is used to pick a winner. Only the contract owner can call this function.
 
