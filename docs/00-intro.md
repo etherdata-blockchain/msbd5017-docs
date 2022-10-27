@@ -29,7 +29,11 @@ This is the tutorial page for your Web3 developer journey. We will be building a
 - Using `ethers.js` to send transaction
 - Using `ethers.js` and `MetaMask` to send transaction
 
-## Chapter5 (in progress...)
+## [Chapter 5](/Chapter5)
+- Creating a simple NFT
+- Minting NFTs using `ethers.js` and `MetaMask`
+
+## Chapter6 (in progress...)
 - Interacting with smart contracts using react
 - Interacting with smart contracts using SwiftUI
 - Interacting with smart contracts using Flutter

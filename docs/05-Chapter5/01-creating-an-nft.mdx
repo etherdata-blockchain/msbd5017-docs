@@ -1,0 +1,192 @@
+---
+title: Creating a NFT
+---
+
+import TestContract from "../../src/components/Chapter5/TestContract";
+
+# Creating a NFT
+
+## Pre-requisites
+
+Before we start, you should have learned about creating a [ERC20 token](/Chapter3/token).
+If you haven't, please go back and read that chapter first.
+
+## What is a NFT?
+
+A NFT is a non-fungible token. It is a token that is unique and cannot be replaced by another token. It is a token that is not interchangeable with other tokens. It is a token that is unique.
+
+## Writing the contract
+
+### Create the contract file
+
+Create a new file called `NFT.sol`
+
+```bash {3}
+test/
+├── contracts
+│   ├── NFT.sol # <--- Create this file
+├── scripts
+├── test
+├── hardhat.config.ts
+├── package.json
+├── tsconfig.json
+```
+
+### Importing the ERC721 contract
+
+We will be using the ERC721 contract from OpenZeppelin.
+This is a contract that implements the ERC721 standard.
+We will be inheriting from this contract to create our own NFT contract.
+
+```solidity {2}
+import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+```
+
+### Inheriting from the ERC721 contract
+
+We will be inheriting from the ERC721 contract from OpenZeppelin.
+
+```solidity
+contract MyNFT is ERC721URIStorage {
+```
+
+### Creating a counter
+
+We will be using a counter to keep track of the number of NFTs we have created.
+
+```solidity {2}
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+```
+
+### Setting the name and symbol
+
+We will be setting the name and symbol of our NFT.
+
+```solidity {2}
+    constructor() ERC721("MyNFT", "NFT") {
+    }
+```
+
+### Creating the mint function
+
+This function will award the `player` an NFT whenever it has been called.
+
+```solidity {6}
+function awardItem(address player, string memory tokenURI)
+        public
+        returns (uint256)
+    {
+        uint256 newItemId = _tokenIds.current();
+        _mint(player, newItemId);
+        _setTokenURI(newItemId, tokenURI);
+
+        _tokenIds.increment();
+        return newItemId;
+    }
+```
+
+## Testing the contract
+
+### Create the test file
+
+Now we will write a test to test our smart contract.
+Open the `test` folder and create a new file called `MyNFT.test.ts`.
+
+```bash {5}
+test/
+├── contracts
+├── scripts
+├── test
+│   ├── MyNFT.test.ts #<--- create this file
+├── hardhat.config.ts
+├── package.json
+├── tsconfig.json
+```
+
+### Deploy the contract in the test
+
+We will be deploying the contract before we start testing it.
+
+:::tip
+We will use a special javascript syntax to get the first and second item from the array.
+For example, we have an array `[1, 2, 3, 4, 5]`.
+
+if we use `const [first, second, ...rest] = [1, 2, 3, 4, 5]`, then `first` will be `1`, `second` will be `2`, and `rest` will be `[3, 4, 5]`.
+:::
+
+```typescript {1}
+const [owner, otherAddress, ...rest] = await ethers.getSigners();
+const MyToken = await ethers.getContractFactory("MyNFT");
+const myToken = await MyToken.deploy();
+await myToken.deployed();
+```
+
+### Testing the mint function
+
+```typescript
+let tx = await myToken.awardItem(owner.address, "https://www.google.com");
+await tx.wait();
+```
+
+### Check the owner of the token and the tokenURI
+
+```typescript
+let tokenOwner = await myToken.ownerOf(0);
+expect(tokenOwner).to.equal(owner.address);
+
+let tokenURI = await myToken.tokenURI(0);
+expect(tokenURI).to.equal("https://www.google.com");
+```
+
+### Complete test file
+
+```typescript
+import { expect } from "chai";
+import { ethers } from "hardhat";
+
+describe("Given MyNFT", function () {
+  it("Should be able to award", async function () {
+    const [owner, otherAddress, ...rest] = await ethers.getSigners();
+    const MyToken = await ethers.getContractFactory("MyNFT");
+    const myToken = await MyToken.deploy();
+    await myToken.deployed();
+
+    let tx = await myToken.awardItem(owner.address, "https://www.google.com");
+    await tx.wait();
+
+    let tokenOwner = await myToken.ownerOf(0);
+    expect(tokenOwner).to.equal(owner.address);
+
+    let tokenURI = await myToken.tokenURI(0);
+    expect(tokenURI).to.equal("https://www.google.com");
+
+    tx = await myToken.awardItem(
+      otherAddress.address,
+      "https://www.google.com/hk"
+    );
+    await tx.wait();
+
+    tokenOwner = await myToken.ownerOf(1);
+    expect(tokenOwner).to.equal(otherAddress.address);
+
+    tokenURI = await myToken.tokenURI(1);
+    expect(tokenURI).to.equal("https://www.google.com/hk");
+  });
+});
+```
+
+<TestContract />
+
+## Deploying the contract
+
+```bash
+npx hardhat run scripts/deploy.ts --network etherdata
+```
+
+:::success
+You can [download the complete code from here](https://files.etdchain.net/simple_nft.zip).
+We also provided a deployed contract on testnet. The contract address is `0x9ab29c1cc907448Bc081668A09Bfd77338B4D037`.
+:::
