@@ -26,11 +26,11 @@ const signer = await provider.getSigner();
 
 The ABI is the interface to interact with the contract.
 It is a JSON object that contains the functions and events of the contract.
-We can download the ABI from [this url](https://etd-service.sgp1.cdn.digitaloceanspaces.com/MyNFT.json).
+We can download the ABI from [this url](https://etherdata-blockchain.github.io/msbd5017-docs/docs/05-Chapter5/files/MyNFT.json).
 
 ```typescript
 const response = await fetch(
-  "https://etd-service.sgp1.cdn.digitaloceanspaces.com/MyNFT.json"
+  "https://etherdata-blockchain.github.io/msbd5017-docs/docs/05-Chapter5/files/MyNFT.json"
 );
 const jsonData = await response.json();
 const abi = jsonData.abi;
@@ -88,7 +88,7 @@ function WalletApp(props) {
 
     // fetch abi
     const response = await fetch(
-      "https://etd-service.sgp1.cdn.digitaloceanspaces.com/MyNFT.json"
+      "https://etherdata-blockchain.github.io/msbd5017-docs/docs/05-Chapter5/files/MyNFT.json"
     );
     const jsonData = await response.json();
     const abi = jsonData.abi;
