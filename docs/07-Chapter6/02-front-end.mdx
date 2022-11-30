@@ -1,0 +1,483 @@
+---
+title: Writing a frontend for the contract
+---
+
+## Preparing the workspace
+
+In this tutorial, we will use [next js](https://nextjs.org/) to create a frontend for our contract.
+To create a new next js project, run the following command:
+
+```bash
+npx create-next-app@latest
+```
+
+And you should have a new project created with the following folder structure:
+
+```bash
+.
+├── src
+├── pages
+├── public
+├── styles
+├── .gitignore
+├── next.config.js
+├── package.json
+├── README.md
+```
+
+### Preparing contract's abi and address
+
+To interact with the contract, we need to have the contract's abi and address.
+If you use hardhat, then you can go to the `artifacts/contracts/Ballot.sol/Ballot.json` to get your abi.
+It should have content similar to the following content
+
+```json
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Ballot",
+  "sourceName": "contracts/Ballot.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_endTime",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ]
+}
+```
+
+Copy everything in the `abi` field and save it as `abi.json` in the `src` folder.
+
+```json
+// src/abi.json
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_endTime",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  }
+]
+```
+
+Create a `src/config.ts` file with the following content
+
+```ts
+// remember to replace the contract address with your own
+export const CONTRACT_ADDRESS = "0x8dB14759E151F17849773f829167573657aD8Bb9";
+```
+
+## Writing the frontend
+
+In your `pages/index.tsx` file, add the following content
+
+### Instaling dependencies
+
+```bash
+npm install ethers
+```
+
+```bash
+npm install dayjs
+```
+
+### Adding a type definition for the candidates result
+
+:::note
+This is similar to the type defined in [your contract](smart-contract#creating-types-for-the-contract)
+:::
+
+```ts
+interface CandidateResult {
+  name: string;
+  candidateAddress: string;
+  voteCount: number;
+}
+```
+
+### Adding states
+
+Adding stats to your component which holds the address from your metamask, the contract instance, and the candidates result.
+and the end time.
+
+```tsx
+export default function Home() {
+  const [address, setAddress] = useState();
+  const [candidateResults, setCandidateResults] = useState<CandidateResult[]>(
+    []
+  );
+  const [endTime, setEndTime] = useState<string>();
+  const [loading, setLoading] = useState(false);
+```
+
+### Adding a function to connect to metamask
+
+```tsx
+const connectToTheMetaMask = useCallback(async () => {
+  // check if the browser has MetaMask installed
+  if (!(window as any).ethereum) {
+    alert("Please install MetaMask first.");
+    return;
+  }
+  // get the user's account address
+  const accounts = await (window as any).ethereum.request({
+    method: "eth_requestAccounts",
+  });
+  setAddress(accounts[0]);
+}, []);
+```
+
+### Getting the signer and provider
+
+```ts
+const signer = useMemo(() => {
+  if (!address) return null;
+  return new ethers.providers.Web3Provider(
+    (window as any).ethereum
+  ).getSigner();
+}, [address]);
+
+const provider = useMemo(() => {
+  // only connect to the contract if the user has MetaMask installed
+  if (typeof window === "undefined") return null;
+  return new ethers.providers.Web3Provider((window as any).ethereum);
+}, []);
+```
+
+### Getting the candidates at the beginning and whenever user votes or registers
+
+```tsx
+useEffect(() => {
+  if (provider) {
+    (async () => {
+      // get latest candidate names
+      const ballotContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        abi,
+        provider
+      );
+
+      // get the list of candidates
+      const results = await ballotContract.getResults();
+      const endTime = ethers.utils.formatUnits(
+        await ballotContract.endTime(),
+        0
+      );
+      setEndTime(dayjs.unix(parseInt(endTime)).format("YYYY-MM-DD HH:mm:ss"));
+      setCandidateResults(results);
+    })();
+  }
+}, [provider, loading]);
+```
+
+### Adding function to register, vote, and get reset
+
+```tsx
+const registerAsCandidate = useCallback(async () => {
+  if (!signer) return;
+  setLoading(true);
+  try {
+    const ballotContract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+    // show a pop-up to the user to confirm the transaction
+    const name = prompt("Please enter your name");
+    if (!name) return;
+    const tx = await ballotContract.registerCandidate(name);
+    // wait for the transaction to be mined
+    await tx.wait();
+  } catch (e) {
+    // show any error using the alert box
+    alert(`Error: ${e}`);
+  }
+  setLoading(false);
+}, [signer]);
+
+const vote = useCallback(
+  async (index: number) => {
+    if (!signer) return;
+    setLoading(true);
+    try {
+      const ballotContract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const tx = await ballotContract.vote(index);
+      await tx.wait();
+    } catch (e) {
+      console.error(e, index);
+      window.alert(`${e}`);
+    }
+    setLoading(false);
+  },
+  [signer]
+);
+
+const reset = useCallback(async () => {
+  if (!signer) return;
+  setLoading(true);
+  try {
+    const ballotContract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+    const endTime = prompt("Please enter the end time in hours");
+    if (endTime) {
+      const parsedEndTime = parseInt(endTime);
+      const tx = await ballotContract.reset(parsedEndTime * 3600);
+      await tx.wait();
+    }
+  } catch (e) {
+    window.alert(`${e}`);
+  }
+  setLoading(false);
+}, [signer]);
+```
+
+### Rendering the UI
+
+```tsx
+return (
+  <div style={{ padding: 20 }}>
+    <h1>Simple Voting System</h1>
+    {loading && <h1>Loading...</h1>}
+    {/* Connect to metamask button */}
+    <div>
+      <label style={{ paddingRight: 10 }}>Address: </label>
+      {!address ? (
+        <button onClick={connectToTheMetaMask}>Connect to the website</button>
+      ) : (
+        <span>{address}</span>
+      )}
+    </div>
+    {/* End time */}
+    <div>
+      <label style={{ paddingRight: 10 }}>End time: {endTime}</label>
+    </div>
+
+    {/** Table for all candidates */}
+    <table style={{ marginTop: 20 }}>
+      <thead>
+        <tr>
+          <th>Candidate Name</th>
+          <th>Candidate Address</th>
+          <th>Vote Count</th>
+          <th>Vote</th>
+        </tr>
+      </thead>
+      <tbody>
+        {candidateResults.map((candidateResult, index) => (
+          <tr key={candidateResult.candidateAddress}>
+            <td>{candidateResult.name}</td>
+            <td>{candidateResult.candidateAddress}</td>
+            <td>{ethers.utils.formatUnits(candidateResult.voteCount, 0)}</td>
+            <td>
+              <button disabled={!address} onClick={() => vote(index)}>
+                Vote
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <div style={{ marginTop: 20 }}>
+      <button disabled={!address} onClick={registerAsCandidate}>
+        Register as a candidate
+      </button>
+      <button disabled={!address} onClick={reset}>
+        Reset
+      </button>
+    </div>
+  </div>
+);
+```
+
+## Complete code
+
+```tsx
+// pages/index.tsx
+
+import Head from "next/head";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import abi from "../src/abi.json";
+import { ethers } from "ethers";
+import { CONTRACT_ADDRESS } from "../src/config";
+import dayjs from "dayjs";
+
+interface CandidateResult {
+  name: string;
+  candidateAddress: string;
+  voteCount: number;
+}
+
+export default function Home() {
+  const [address, setAddress] = useState();
+  const [candidateResults, setCandidateResults] = useState<CandidateResult[]>(
+    []
+  );
+  const [endTime, setEndTime] = useState<string>();
+  const [loading, setLoading] = useState(false);
+
+  const connectToTheMetaMask = useCallback(async () => {
+    // check if the browser has MetaMask installed
+    if (!(window as any).ethereum) {
+      alert("Please install MetaMask first.");
+      return;
+    }
+    // get the user's account address
+    const accounts = await (window as any).ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    setAddress(accounts[0]);
+  }, []);
+
+  const signer = useMemo(() => {
+    if (!address) return null;
+    return new ethers.providers.Web3Provider(
+      (window as any).ethereum
+    ).getSigner();
+  }, [address]);
+
+  const provider = useMemo(() => {
+    // only connect to the contract if the user has MetaMask installed
+    if (typeof window === "undefined") return null;
+    return new ethers.providers.Web3Provider((window as any).ethereum);
+  }, []);
+
+  // function will be called whenever the address changed
+  useEffect(() => {
+    if (provider) {
+      (async () => {
+        // get latest candidate names
+        const ballotContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          abi,
+          provider
+        );
+
+        // get the list of candidates
+        const results = await ballotContract.getResults();
+        const endTime = ethers.utils.formatUnits(
+          await ballotContract.endTime(),
+          0
+        );
+        setEndTime(dayjs.unix(parseInt(endTime)).format("YYYY-MM-DD HH:mm:ss"));
+        setCandidateResults(results);
+      })();
+    }
+  }, [provider, loading]);
+
+  const registerAsCandidate = useCallback(async () => {
+    if (!signer) return;
+    setLoading(true);
+    try {
+      const ballotContract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      // show a pop-up to the user to confirm the transaction
+      const name = prompt("Please enter your name");
+      if (!name) return;
+      const tx = await ballotContract.registerCandidate(name);
+      // wait for the transaction to be mined
+      await tx.wait();
+    } catch (e) {
+      // show any error using the alert box
+      alert(`Error: ${e}`);
+    }
+    setLoading(false);
+  }, [signer]);
+
+  const vote = useCallback(
+    async (index: number) => {
+      if (!signer) return;
+      setLoading(true);
+      try {
+        const ballotContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          abi,
+          signer
+        );
+        const tx = await ballotContract.vote(index);
+        await tx.wait();
+      } catch (e) {
+        console.error(e, index);
+        window.alert(`${e}`);
+      }
+      setLoading(false);
+    },
+    [signer]
+  );
+
+  const reset = useCallback(async () => {
+    if (!signer) return;
+    setLoading(true);
+    try {
+      const ballotContract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+      const endTime = prompt("Please enter the end time in hours");
+      if (endTime) {
+        const parsedEndTime = parseInt(endTime);
+        const tx = await ballotContract.reset(parsedEndTime * 3600);
+        await tx.wait();
+      }
+    } catch (e) {
+      window.alert(`${e}`);
+    }
+    setLoading(false);
+  }, [signer]);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Simple Voting System</h1>
+      {loading && <h1>Loading...</h1>}
+      {/* Connect to metamask button */}
+      <div>
+        <label style={{ paddingRight: 10 }}>Address: </label>
+        {!address ? (
+          <button onClick={connectToTheMetaMask}>Connect to the website</button>
+        ) : (
+          <span>{address}</span>
+        )}
+      </div>
+      {/* End time */}
+      <div>
+        <label style={{ paddingRight: 10 }}>End time: {endTime}</label>
+      </div>
+
+      {/** Table for all candidates */}
+      <table style={{ marginTop: 20 }}>
+        <thead>
+          <tr>
+            <th>Candidate Name</th>
+            <th>Candidate Address</th>
+            <th>Vote Count</th>
+            <th>Vote</th>
+          </tr>
+        </thead>
+        <tbody>
+          {candidateResults.map((candidateResult, index) => (
+            <tr key={candidateResult.candidateAddress}>
+              <td>{candidateResult.name}</td>
+              <td>{candidateResult.candidateAddress}</td>
+              <td>{ethers.utils.formatUnits(candidateResult.voteCount, 0)}</td>
+              <td>
+                <button disabled={!address} onClick={() => vote(index)}>
+                  Vote
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ marginTop: 20 }}>
+        <button disabled={!address} onClick={registerAsCandidate}>
+          Register as a candidate
+        </button>
+        <button disabled={!address} onClick={reset}>
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+```
