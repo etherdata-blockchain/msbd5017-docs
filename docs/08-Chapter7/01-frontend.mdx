@@ -1,0 +1,185 @@
+---
+title: Building a simple frontend using Flutterflow
+---
+
+# Building a simple frontend using Flutterflow
+
+We are about to build a very simple frontend for our voting application using Flutterflow.
+
+## Building the Wallet Setup Page
+
+First create a new project called `VotingApp` using the blank template.
+
+![Blank App](./images/00-blank-app.png)
+
+Next, we will create a `TextField` to let user enter their private key and a `RaisedButton` to let them submit the private key.
+
+1. First drag the column widget to the screen.
+   ![Drag Column](./images/01-column.png)
+2. Click the right side `Strach` button to stretch the column to the full screen.
+   :::tip
+   In Flutter, column is a widget that arranges its children vertically and row is a widget that arranges its children horizontally.
+   :::
+   ![Stretch Column](./images/02-expand-column.png)
+3. Drag `TextField` and `RaisedButton` to the column.
+   ![Drag TextField and RaisedButton](./images/03-add-widgets.png)
+4. Beautify the `TextField` by changing the `hintText` to `Enter your private key`, `MaxLines` to 10, `RaisedButton` label to `Submit` and
+   `PaddingTop` to 10.
+   ![Beautify TextField and RaisedButton](./images/04-beautify-app.png)
+5. Click the `AppState` button on the left
+   ![Click AppState](./images/05-app-state.png)
+6. Create an `AppState` variable called `privateKey` and set it to `Persisted` and then click the `Secure Persisted Fields` button to securely store the private key.
+   ![Create AppState variable](./images/06-create-app-state.png)
+   ![Secure Persisted Fields](./images/07-secure-persisted-fields.png)
+7. Click the `Submit` button, add action, click `set field value`, select `privateKey` and set it to `TextField` value.
+   ![Set private key](./images/08-set-private-key.png)
+8. Rename page to `PrivateKeyPage` and set the page title to `Set up wallet`
+   ![rename](./images/09-rename.png)
+9. Create a new page called `HomePage`, click the submit button, click Open button in `Action Flow Editor` area, click add action, select `Navigate to page` and select `HomePage`.
+   ![Create HomePage](./images/10-navigate-to-home-01.png)
+   ![Create HomePage](./images/10-navigate-to-home-02.png)
+
+## Building the Candidate List Page
+
+1. Drag the `ListView` into the `HomePage`
+   ![Drag ListView](./images/11-drag-listview.png)
+2. Drag the `ListTile` into the `ListView`
+   ![Drag ListTile](./images/12-drag-listtile.png)
+3. Change the `PageTitle` to `Candidates List`
+   ![Change PageTitle](./images/13-change-appbar.png)
+4. Change the `AppBar` style to allow user to go back to the previous page.
+   ![Change AppBar style](./images/14-change-appbar-style.png)
+5. Click the add custom type side bar button and create a new custom type called `CandidateStruct` with two fields `name` and `address`.
+   ![Create CandidateStruct](./images/15-create-candidate-struct.png)
+6. Add the custom function called `listCandidates`.
+   ![Add listCandidates](./images/16-add-list-candidates.png)
+   The code in the function is as follows:
+
+```dart
+final _contractAbi = ContractAbi.fromJson(
+  '[{"inputs":[{"internalType":"uint256","name":"_endTime","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"AddCandidate","type":"event"},{"inputs":[{"internalType":"string","name":"_name","type":"string"}],"name":"registerCandidate","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_endTime","type":"uint256"}],"name":"reset","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[],"name":"Reset","type":"event"},{"inputs":[{"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"voter","type":"address"},{"indexed":true,"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"Vote","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"candidates","outputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"address","name":"candidateAddress","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"endTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getResults","outputs":[{"components":[{"internalType":"string","name":"name","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"address","name":"candidateAddress","type":"address"}],"internalType":"struct Results[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isEnded","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"startTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"voters","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"voterStatus","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"votesReceived","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]',
+  'Ballot',
+);
+
+Future<List<CandidateStruct>> listCandidates() async {
+  // Add your function code here!
+  final apiUrl = "https://rpc1.aries.axiomesh.io"; //Replace with your API
+
+  final httpClient = Client();
+  final ethClient = Web3Client(apiUrl, httpClient);
+  // final credentials = EthPrivateKey.fromHex("0x...");
+  final contractAddress = "0x2467F498d9b139a7761f61442790B3d4451431e4";
+
+  final contract =
+      DeployedContract(_contractAbi, EthereumAddress.fromHex(contractAddress));
+  final candidatesFunction = contract.function('getResults');
+  final params = [];
+  final candidates = await ethClient.call(
+    contract: contract,
+    function: candidatesFunction,
+    params: params,
+  );
+
+  final candidatesResult = (candidates[0] as List).map((e) {
+    final String name = e[0];
+    final BigInt count = e[1];
+    final EthereumAddress address = e[2];
+
+    return CandidateStruct(
+      name: name,
+      address: address.hex,
+      count: count.toInt(),
+    );
+  }).toList();
+
+  return candidatesResult;
+}
+```
+
+7. Add Custom Action to `HomePage`
+
+   First, create a local state variable called candidates
+   so that we can store the candidates list returned from the `listCandidates` function.
+   Remeber to click `isList` checkbox to indicate that the variable is a list.
+   ![Create local state variable](./images/18-setup-state.png)
+
+   Then, we can setup the `action` by building up the action chain.
+   :::info
+   We will first call the `listCandidates` function to get the candidates list
+   and then set the `candidates` variable to the result.
+
+   Finally, we will store the `candidates` variable to the `LocalState` so that we can use it afterwards.
+   :::
+   ![Setup Action](./images/17-enable-action.png)
+
+8. Setup the listview's data source
+   ![Setup ListView](./images/19-setup-listview.png)
+9. Setup the `listtile`'s title and subtitle by first clicking the `listtile` and then clicking the `variable` button.
+   ![Setup ListTile](./images/20-setup-listtile-title.png)
+   ![Setup ListTile](./images/20-setup-listtile-subtitle.png)
+
+## Add `RegisterCandidate` functionality
+
+1. Drag `Fab` to `HomePage`
+   ![Drag Fab](./images/21-drag-floating-action-button.png)
+2. Create a new page called `RegistrationPage`
+3. Follow the previous steps, change the page title to `Register Candidate`,
+   add a `TextField` and a `RaisedButton` to the page.
+   ![Register Candidate](./images/22-setup-registration-page.png)
+4. Add navigation action that allows user to navigate to `RegistrationPage` from `HomePage`
+   ![Add navigation action](./images/23-navigate-to-registration-page.png)
+5. Create a new custom function called `registerCandidate` that takes in a `String` parameter called `name`.
+   ![Create registerCandidate](./images/24-add-custom-code-action.png)
+   The code in the function is as follows:
+
+```dart
+// Automatic FlutterFlow imports
+import '/backend/schema/structs/index.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/custom_code/actions/index.dart'; // Imports other custom actions
+import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+import 'package:flutter/material.dart';
+// Begin custom action code
+// DO NOT REMOVE OR MODIFY THE CODE ABOVE!
+
+import 'package:web3dart/web3dart.dart';
+import 'package:http/http.dart';
+
+final _contractAbi = ContractAbi.fromJson(
+  '[{"inputs":[{"internalType":"uint256","name":"_endTime","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"AddCandidate","type":"event"},{"inputs":[{"internalType":"string","name":"_name","type":"string"}],"name":"registerCandidate","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_endTime","type":"uint256"}],"name":"reset","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[],"name":"Reset","type":"event"},{"inputs":[{"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"voter","type":"address"},{"indexed":true,"internalType":"uint256","name":"candidateIndex","type":"uint256"}],"name":"Vote","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"candidates","outputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"address","name":"candidateAddress","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"endTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getResults","outputs":[{"components":[{"internalType":"string","name":"name","type":"string"},{"internalType":"uint256","name":"voteCount","type":"uint256"},{"internalType":"address","name":"candidateAddress","type":"address"}],"internalType":"struct Results[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isEnded","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"startTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalVotes","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"voters","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"voterStatus","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"votesReceived","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]',
+  'Ballot',
+);
+
+Future registerCandidate(String? name) async {
+  final apiUrl = "https://rpc1.aries.axiomesh.io";
+  final httpClient = Client();
+  final ethClient = Web3Client(apiUrl, httpClient);
+  final contractAddress = "0x2467F498d9b139a7761f61442790B3d4451431e4";
+
+  final privateKey = FFAppState().privateKey;
+  final credentials = EthPrivateKey.fromHex(privateKey);
+
+  final contract =
+      DeployedContract(_contractAbi, EthereumAddress.fromHex(contractAddress));
+  final registerCandidateFunction = contract.function('registerCandidate');
+  final params = [
+    name,
+  ];
+  // ChainID needs to be set to 23411, otherwise, the transaction will fail.
+  await ethClient.sendTransaction(
+    credentials,
+    Transaction.callContract(
+      contract: contract,
+      function: registerCandidateFunction,
+      parameters: params,
+    ),
+    chainId: 23411,
+  );
+}
+```
+
+6. Add action to `RaisedButton` to call the `registerCandidate` function.
+   ![Add action to RaisedButton](./images/25-add-action-to-raised-button.png)
+7. Config `ActionChain` to enable user to navigate back to `HomePage` after the registration is successful.
+   ![Config ActionChain](./images/26-config-action-chain.png)

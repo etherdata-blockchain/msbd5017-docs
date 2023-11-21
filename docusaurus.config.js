@@ -107,7 +107,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-        additionalLanguages: ["solidity"],
+        additionalLanguages: ["solidity", "dart"],
       },
       typesense: {
         typesenseCollectionName: "msbd5017-docs",
