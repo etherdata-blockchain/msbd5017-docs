@@ -21,7 +21,7 @@ import {
 import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
 import clsx from 'clsx'
 
-import { navigation } from '@/components/Navigation'
+import { navigation } from '@/navigation'
 import { type Result } from '@/mdx/search.mjs'
 
 type EmptyObject = Record<string, never>
@@ -176,7 +176,18 @@ function SearchResult({
   let id = useId()
 
   let sectionTitle = navigation.find((section) =>
-    section.links.find((link) => link.href === result.url.split('#')[0]),
+    section.links.find((link) => {
+      if ('href' in link) {
+        return link.href === result.url
+      }
+
+      return link.links.find((sublink) => {
+        if ('href' in sublink) {
+          return sublink.href === result.url
+        }
+        return false
+      })
+    }),
   )?.title
   let hierarchy = [sectionTitle, result.pageTitle].filter(
     (x): x is string => typeof x === 'string',

@@ -11,7 +11,19 @@ import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { remToPx } from '@/lib/remToPx'
-import { NavGroup, navigation } from '@/navigation'
+
+export interface NavLink {
+  title: string
+  href: string
+}
+
+export interface NavGroup {
+  title: string
+  links: (NavLink | NavGroup)[]
+}
+
+// Assume navigation is imported from somewhere
+import { navigation } from '@/navigation'
 
 function useInitialValue<T>(value: T, condition = true) {
   let initialValue = useRef(value).current
@@ -99,7 +111,7 @@ function VisibleSectionHighlight({
     ? Math.max(1, visibleSections.length) * itemHeight
     : itemHeight
   let top =
-    group.links.findIndex((link) => link.href === pathname) * itemHeight +
+    findActiveIndex(group, pathname) * itemHeight +
     firstVisibleSectionIndex * itemHeight
 
   return (
@@ -123,7 +135,7 @@ function ActivePageMarker({
 }) {
   let itemHeight = remToPx(2)
   let offset = remToPx(0.25)
-  let activePageIndex = group.links.findIndex((link) => link.href === pathname)
+  let activePageIndex = findActiveIndex(group, pathname)
   let top = offset + activePageIndex * itemHeight
 
   return (
@@ -138,34 +150,52 @@ function ActivePageMarker({
   )
 }
 
+function findActiveIndex(group: NavGroup, pathname: string): number {
+  let index = 0
+  for (const item of group.links) {
+    if ('href' in item && item.href === pathname) {
+      return index
+    }
+    if ('links' in item) {
+      const nestedIndex = findActiveIndex(item, pathname)
+      if (nestedIndex !== -1) {
+        return index + nestedIndex
+      }
+    }
+    index++
+  }
+  return -1
+}
+
 function NavigationGroup({
   group,
   className,
+  level = 0,
 }: {
   group: NavGroup
   className?: string
+  level?: number
 }) {
-  // If this is the mobile navigation then we always render the initial
-  // state, so that the state does not change during the close animation.
-  // The state will still update when we re-open (re-render) the navigation.
   let isInsideMobileNavigation = useIsInsideMobileNavigation()
   let [pathname, sections] = useInitialValue(
     [usePathname(), useSectionStore((s) => s.sections)],
     isInsideMobileNavigation,
   )
 
-  let isActiveGroup =
-    group.links.findIndex((link) => link.href === pathname) !== -1
+  let isActiveGroup = findActiveIndex(group, pathname) !== -1
 
   return (
     <li className={clsx('relative mt-6', className)}>
       <motion.h2
         layout="position"
-        className="text-xs font-semibold text-zinc-900 dark:text-white"
+        className={clsx(
+          'text-xs font-semibold text-zinc-900 dark:text-white',
+          level > 0 && 'ml-4',
+        )}
       >
         {group.title}
       </motion.h2>
-      <div className="relative mt-3 pl-2">
+      <div className={clsx('relative mt-3 pl-2', level > 0 && 'ml-4')}>
         <AnimatePresence initial={!isInsideMobileNavigation}>
           {isActiveGroup && (
             <VisibleSectionHighlight group={group} pathname={pathname} />
@@ -181,38 +211,44 @@ function NavigationGroup({
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
-          {group.links.map((link) => (
-            <motion.li key={link.href} layout="position" className="relative">
-              <NavLink href={link.href} active={link.href === pathname}>
-                {link.title}
-              </NavLink>
+          {group.links.map((link, index) => (
+            <motion.li key={index} layout="position" className="relative">
+              {'href' in link ? (
+                <NavLink href={link.href} active={link.href === pathname}>
+                  {link.title}
+                </NavLink>
+              ) : (
+                <NavigationGroup group={link} level={level + 1} />
+              )}
               <AnimatePresence mode="popLayout" initial={false}>
-                {link.href === pathname && sections.length > 0 && (
-                  <motion.ul
-                    role="list"
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      opacity: 1,
-                      transition: { delay: 0.1 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      transition: { duration: 0.15 },
-                    }}
-                  >
-                    {sections.map((section) => (
-                      <li key={section.id}>
-                        <NavLink
-                          href={`${link.href}#${section.id}`}
-                          tag={section.tag}
-                          isAnchorLink
-                        >
-                          {section.title}
-                        </NavLink>
-                      </li>
-                    ))}
-                  </motion.ul>
-                )}
+                {'href' in link &&
+                  link.href === pathname &&
+                  sections.length > 0 && (
+                    <motion.ul
+                      role="list"
+                      initial={{ opacity: 0 }}
+                      animate={{
+                        opacity: 1,
+                        transition: { delay: 0.1 },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        transition: { duration: 0.15 },
+                      }}
+                    >
+                      {sections.map((section) => (
+                        <li key={section.id}>
+                          <NavLink
+                            href={`${link.href}#${section.id}`}
+                            tag={section.tag}
+                            isAnchorLink
+                          >
+                            {section.title}
+                          </NavLink>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
               </AnimatePresence>
             </motion.li>
           ))}

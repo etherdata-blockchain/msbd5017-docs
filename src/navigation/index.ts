@@ -1,12 +1,4 @@
-import { navigation } from './menu'
-
-interface NavGroup {
-  title: string
-  links: Array<{
-    title: string
-    href: string
-  }>
-}
+import { navigation, NavGroup, NavLink } from './navigation'
 
 export { navigation }
-export type { NavGroup }
+export type { NavGroup, NavLink }
