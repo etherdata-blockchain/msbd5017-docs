@@ -40,7 +40,12 @@ function PageLink({
 function PageNavigation() {
   let pathname = usePathname()
   let allPages = navigation.flatMap((group) => group.links)
-  let currentPageIndex = allPages.findIndex((page) => page.href === pathname)
+  let currentPageIndex = allPages.findIndex((page) => {
+    if ('href' in page) {
+      return page.href === pathname
+    }
+    return false
+  })
 
   if (currentPageIndex === -1) {
     return null
@@ -57,11 +62,13 @@ function PageNavigation() {
     <div className="flex">
       {previousPage && (
         <div className="flex flex-col items-start gap-3">
+          {/* @ts-expect-error */}
           <PageLink label="Previous" page={previousPage} previous />
         </div>
       )}
       {nextPage && (
         <div className="ml-auto flex flex-col items-end gap-3">
+          {/* @ts-expect-error */}
           <PageLink label="Next" page={nextPage} />
         </div>
       )}
