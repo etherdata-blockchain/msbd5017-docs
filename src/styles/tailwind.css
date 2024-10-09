@@ -70,6 +70,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'remark-callouts/styles.css';
 @layer base {
   * {
     @apply border-border;

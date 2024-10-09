@@ -1,21 +1,7 @@
 'use server'
+import { CompilerOutput } from '@/lib/interfaces'
 //@ts-expect-error
 import solc from 'solc'
-
-interface CompilerOutput {
-  errors: {
-    component: string
-    formattedMessage: string
-    message: string
-    severity: string
-    sourceLocation?: {
-      end: number
-      file: string
-      start: number
-    }
-    type: string
-  }[]
-}
 
 export async function compile(sourceCode: string): Promise<CompilerOutput> {
   const input = {
@@ -25,8 +11,18 @@ export async function compile(sourceCode: string): Promise<CompilerOutput> {
         content: sourceCode,
       },
     },
+    settings: {
+      outputSelection: {
+        '*': {
+          '*': ['abi', 'evm.bytecode'],
+        },
+      },
+    },
   }
 
+  console.log(solc.version())
+
   const output = solc.compile(JSON.stringify(input))
+
   return JSON.parse(output)
 }

@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { Button } from '../Button'
 import { Transition } from '@headlessui/react'
+import { Checker, CompilerOutput } from '@/lib/interfaces'
+import { useSolidity } from '@/context/solidityContext'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -13,6 +15,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 
 interface EditorProps {
   sourceCode?: string
+  checker?: Checker
 }
 
 const compilationDelay = 1000
@@ -36,13 +39,12 @@ const offsetToLineColumn = (offset: number, code: string) => {
   return { lineNumber, columnNumber }
 }
 
-export function Editor({ sourceCode }: EditorProps) {
+export function Editor({ sourceCode, checker }: EditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const monacoRef = useRef<typeof monaco | null>(null)
-  const [code, setCode] = useState(sourceCode)
-  const [isCompiling, setIsCompiling] = useState(false)
   const [hasErrors, setHasErrors] = useState(false)
   const [success, setSuccess] = useState(false)
+  const { setCompilerOutput, isCompiling, setIsCompiling } = useSolidity()
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -70,7 +72,6 @@ export function Editor({ sourceCode }: EditorProps) {
 
     // set errors
     if (result.errors && result.errors.length > 0) {
-      console.log(result.errors)
       setHasErrors(true)
       result.errors.forEach((error) => {
         if (editorRef.current && monacoRef.current) {
@@ -97,9 +98,38 @@ export function Editor({ sourceCode }: EditorProps) {
         }
       })
     } else {
+      if (checker) {
+        const [hasErrors, message] = await checker(result)
+        setHasErrors(hasErrors)
+        if (hasErrors) {
+          // set marker
+          if (editorRef.current && monacoRef.current) {
+            const model = editorRef.current.getModel()
+            if (model) {
+              // set the error at the first line to the end of the file
+              const sourceCode = editorRef.current.getValue()
+              const start = { lineNumber: 1, columnNumber: 1 }
+              const end = offsetToLineColumn(sourceCode.length, sourceCode)
+              monacoRef.current.editor.setModelMarkers(model, 'compiler', [
+                {
+                  startLineNumber: start.lineNumber,
+                  startColumn: start.columnNumber,
+                  endLineNumber: end.lineNumber,
+                  endColumn: end.columnNumber,
+                  message,
+                  severity: monacoRef.current.MarkerSeverity.Error,
+                },
+              ])
+            }
+          }
+          return
+        }
+      }
+
       // Clear markers if no errors
       setSuccess(true)
       setHasErrors(false)
+      setCompilerOutput(result)
       if (editorRef.current && monacoRef.current) {
         const model = editorRef.current.getModel()
         if (model) {
@@ -151,7 +181,6 @@ export function Editor({ sourceCode }: EditorProps) {
         language="sol"
         defaultValue={sourceCode}
         onChange={(value) => {
-          setCode(value)
           if (value) {
             debouncedCompile(value)
           }

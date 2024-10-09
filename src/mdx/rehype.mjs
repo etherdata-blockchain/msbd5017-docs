@@ -5,7 +5,6 @@ import { mdxAnnotations } from 'mdx-annotations'
 import shiki from 'shiki'
 import { visit } from 'unist-util-visit'
 import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 function rehypeParseCodeBlocks() {
   return (tree) => {
@@ -121,17 +120,6 @@ export const rehypePlugins = [
   rehypeShiki,
   rehypeSlugify,
   rehypeSlug,
-  [
-    rehypeAutolinkHeadings,
-    {
-      behaviour: 'append',
-      properties: {
-        ariaHidden: true,
-        tabIndex: -1,
-        className: 'hash-link',
-      },
-    },
-  ],
   [
     rehypeAddMDXExports,
     (tree) => ({

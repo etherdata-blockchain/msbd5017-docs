@@ -1,10 +1,41 @@
 ---
-title: Getting started
+title: Getting Started
 ---
 
-import { Editor } from '@/components/solc/Editor'
-import { HELLOWORLD_SOLC } from '@/source-code/helloworld.solc.ts'
+import Example1 from '@/components/docs/getting-started/Example1'
 
-In this section, you will learn the basics of the course and how to get started with MSBD5017.
+# Welcome to MSBD5017
 
-<Editor sourceCode={HELLOWORLD_SOLC} />
+This section will introduce you to the basics of our course and guide you through your first steps in MSBD5017.
+
+## Your First Smart Contract: Hello World
+
+Let's begin with a simple yet fundamental example in smart contract development - the "Hello World" program. This example will help you understand the basic structure of a smart contract.
+
+### What We're Building
+
+We'll create a smart contract named `HelloWorld` that has a single function `hello`. When called, this function will return a greeting message.
+
+### The Code
+
+Feel free to experiment with the code and see how your changes affect the output.
+
+> [!tip]
+> Here are a few tips to help you get started:
+>
+> 1. The code is automatically compiled as you type.
+> 2. If you want to manually compile, press `Cmd + Shift + S` (on Mac) or `Ctrl + Shift + S` (on Windows/Linux).
+> 3. Try changing the return message in the `hello` function and see how it updates the output!
+
+<Example1 />
+
+### Understanding the Code
+
+Let's break down what's happening in this smart contract:
+
+1. `contract HelloWorld`: This line declares a new smart contract named "HelloWorld".
+2. `function hello() public pure returns (string memory)`: This defines a function named "hello" that:
+   - Is `public`, meaning it can be called from outside the contract.
+   - Is `pure`, indicating it doesn't modify or read the contract's state.
+   - Returns a `string`.
+3. `return "Hello, World!";`: This is the actual greeting our function returns.
