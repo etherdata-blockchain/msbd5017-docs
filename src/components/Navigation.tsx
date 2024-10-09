@@ -183,7 +183,13 @@ function NavigationGroup({
           level > 0 && 'ml-4',
         )}
       >
-        {group.title}
+        {group.href ? (
+          <Link href={group.href} className="hover:text-green-500">
+            {group.title}
+          </Link>
+        ) : (
+          group.title
+        )}
       </motion.h2>
       <div className={clsx('relative mt-3 pl-2', level > 0 && 'ml-4')}>
         <AnimatePresence initial={!isInsideMobileNavigation}>
@@ -204,7 +210,7 @@ function NavigationGroup({
           {group.links.map((link, index) => (
             <motion.li key={index} layout="position" className="relative">
               {'href' in link ? (
-                <NavLink href={link.href} active={link.href === pathname}>
+                <NavLink href={link.href ?? ''} active={link.href === pathname}>
                   {link.title}
                 </NavLink>
               ) : (

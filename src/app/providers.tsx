@@ -2,6 +2,12 @@
 
 import { useEffect } from 'react'
 import { ThemeProvider, useTheme } from 'next-themes'
+import {
+  EnvironmentContextProvider,
+  MetaMaskProvider,
+  OKXProvider,
+  WalletContextProvider,
+} from 'web3-connect-react'
 
 function ThemeWatcher() {
   let { resolvedTheme, setTheme } = useTheme()
@@ -27,11 +33,27 @@ function ThemeWatcher() {
   return null
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  session,
+}: {
+  children: React.ReactNode
+  session: any
+}) {
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange>
-      <ThemeWatcher />
-      {children}
+      <EnvironmentContextProvider isMobile={false} isTest={false}>
+        <WalletContextProvider
+          session={session}
+          providers={[OKXProvider, MetaMaskProvider]}
+          onSignedOut={async () => {}}
+          listenToAccountChanges={false}
+          listenToChainChanges={false}
+        >
+          <ThemeWatcher />
+          {children}
+        </WalletContextProvider>
+      </EnvironmentContextProvider>
     </ThemeProvider>
   )
 }

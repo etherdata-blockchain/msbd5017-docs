@@ -41,21 +41,21 @@ class MDXMenuPlugin {
 
   buildMenu(dir, baseHref = '') {
     const files = fs.readdirSync(dir)
-    const pageFile = files.find((file) => file === 'page.mdx')
+    let currentItem = null
+    const subItems = []
 
+    // First, check for page.mdx in the current directory
+    const pageFile = files.find((file) => file === 'page.mdx')
     if (pageFile) {
       const filePath = path.join(dir, pageFile)
       const content = fs.readFileSync(filePath, 'utf-8')
       const { data } = matter(content)
       const title = data.title || path.basename(dir)
       const href = '/' + baseHref.replace(/\\/g, '/')
-
-      if (title !== 'app') {
-        return { title, href }
-      }
+      currentItem = { title, href }
     }
 
-    const subItems = []
+    // Then, process subdirectories
     for (const file of files) {
       const filePath = path.join(dir, file)
       const stat = fs.statSync(filePath)
@@ -68,7 +68,17 @@ class MDXMenuPlugin {
       }
     }
 
-    if (subItems.length > 0) {
+    // Combine current item and subitems
+    if (currentItem) {
+      if (subItems.length > 0) {
+        return {
+          ...currentItem,
+          links: subItems,
+        }
+      } else {
+        return currentItem
+      }
+    } else if (subItems.length > 0) {
       return {
         title: path.basename(dir),
         links: subItems,
@@ -89,6 +99,7 @@ export interface NavLink {
 
 export interface NavGroup {
   title: string;
+  href?: string;
   links: (NavLink | NavGroup)[]
 }
 
