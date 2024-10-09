@@ -45,6 +45,7 @@ export function Editor({ sourceCode, checker }: EditorProps) {
   const [hasErrors, setHasErrors] = useState(false)
   const [success, setSuccess] = useState(false)
   const { setCompilerOutput, isCompiling, setIsCompiling } = useSolidity()
+  const [code, setCode] = useState(sourceCode)
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -174,13 +175,20 @@ export function Editor({ sourceCode, checker }: EditorProps) {
     }
   }, [compileSourceCode])
 
+  useEffect(() => {
+    if (sourceCode) {
+      setCode(sourceCode)
+    }
+  }, [sourceCode])
+
   return (
     <div className="relative rounded-xl border p-5">
       <MonacoEditor
         height={'600px'}
         language="sol"
-        defaultValue={sourceCode}
+        value={code}
         onChange={(value) => {
+          setCode(value)
           if (value) {
             debouncedCompile(value)
           }
