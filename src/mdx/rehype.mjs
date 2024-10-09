@@ -4,6 +4,8 @@ import { toString } from 'mdast-util-to-string'
 import { mdxAnnotations } from 'mdx-annotations'
 import shiki from 'shiki'
 import { visit } from 'unist-util-visit'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 function rehypeParseCodeBlocks() {
   return (tree) => {
@@ -63,11 +65,14 @@ function rehypeSlugify() {
 }
 
 function rehypeAddMDXExports(getExports) {
-  return (tree) => {
-    let exports = Object.entries(getExports(tree))
+  return (tree, file) => {
+    const exports = Object.entries({
+      ...getExports(tree),
+      frontmatter: JSON.stringify(file.data.frontmatter || {}),
+    })
 
-    for (let [name, value] of exports) {
-      for (let node of tree.children) {
+    for (const [name, value] of exports) {
+      for (const node of tree.children) {
         if (
           node.type === 'mdxjsEsm' &&
           new RegExp(`export\\s+const\\s+${name}\\s*=`).test(node.value)
@@ -115,6 +120,18 @@ export const rehypePlugins = [
   rehypeParseCodeBlocks,
   rehypeShiki,
   rehypeSlugify,
+  rehypeSlug,
+  [
+    rehypeAutolinkHeadings,
+    {
+      behaviour: 'append',
+      properties: {
+        ariaHidden: true,
+        tabIndex: -1,
+        className: 'hash-link',
+      },
+    },
+  ],
   [
     rehypeAddMDXExports,
     (tree) => ({
