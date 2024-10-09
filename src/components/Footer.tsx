@@ -41,6 +41,7 @@ function PageNavigation() {
   let pathname = usePathname()
   let allPages = navigation.flatMap((group) => group.links)
   let currentPageIndex = allPages.findIndex((page) => {
+    if (!page) return false
     if ('href' in page) {
       return page.href === pathname
     }

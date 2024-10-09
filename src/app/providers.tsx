@@ -42,6 +42,7 @@ export function Providers({
 }) {
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange>
+      <ThemeWatcher />
       <EnvironmentContextProvider isMobile={false} isTest={false}>
         <WalletContextProvider
           session={session}
@@ -50,7 +51,6 @@ export function Providers({
           listenToAccountChanges={false}
           listenToChainChanges={false}
         >
-          <ThemeWatcher />
           {children}
         </WalletContextProvider>
       </EnvironmentContextProvider>

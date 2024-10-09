@@ -99,8 +99,8 @@ export interface NavLink {
 
 export interface NavGroup {
   title: string;
-  href?: string;
-  links: (NavLink | NavGroup)[]
+  href?: string
+  links?: (NavLink | NavGroup)[]
 }
 
 export const navigation: NavGroup[] = ${JSON.stringify(menu, null, 2)};

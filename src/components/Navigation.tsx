@@ -142,7 +142,7 @@ function ActivePageMarker({
 
 function findActiveIndex(group: NavGroup, pathname: string): number {
   let index = 0
-  for (const item of group.links) {
+  for (const item of group?.links ?? []) {
     if ('href' in item && item.href === pathname) {
       return index
     }
@@ -207,7 +207,7 @@ function NavigationGroup({
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
-          {group.links.map((link, index) => (
+          {group.links?.map((link, index) => (
             <motion.li key={index} layout="position" className="relative">
               {'href' in link ? (
                 <NavLink href={link.href ?? ''} active={link.href === pathname}>
