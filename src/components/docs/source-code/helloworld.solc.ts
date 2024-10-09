@@ -1,6 +1,5 @@
 import { Checker, CompilerOutput } from '@/lib/interfaces'
 
-
 export const source = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 

@@ -4,10 +4,12 @@ import { useSolidity } from '@/context/solidityContext'
 import { Checker } from '@/lib/interfaces'
 import { Transition } from '@headlessui/react'
 import { CircleAlertIcon, CircleCheck, Loader2 } from 'lucide-react'
-import monaco, { editor } from 'monaco-editor'
+import { editor } from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../shared/Button'
 import dynamic from 'next/dynamic'
+import { addSolidityIntellisense } from './editor.utils'
+import { Monaco } from '@monaco-editor/react'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -46,7 +48,7 @@ export default function Editor({
   height = '50vh',
 }: EditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
-  const monacoRef = useRef<typeof monaco | null>(null)
+  const monacoRef = useRef<Monaco | null>(null)
   const [hasErrors, setHasErrors] = useState(false)
   const [success, setSuccess] = useState(false)
   const { setCompilerOutput, isCompiling, setIsCompiling } = useSolidity()
@@ -77,70 +79,84 @@ export default function Editor({
       })
 
     // set errors
-    if (result.errors && result.errors.length > 0) {
-      setHasErrors(true)
-      result.errors.forEach((error) => {
+    const hasError = result.errors?.some((error) => error.severity === 'error')
+    const hasWarning = result.errors?.some(
+      (error) => error.severity === 'warning',
+    )
+
+    result.errors?.forEach((error) => {
+      if (editorRef.current && monacoRef.current) {
+        const model = editorRef.current.getModel()
+        if (model && error.sourceLocation) {
+          const sourceCode = editorRef.current.getValue()
+          const start = offsetToLineColumn(
+            error.sourceLocation.start,
+            sourceCode,
+          )
+          const end = offsetToLineColumn(error.sourceLocation.end, sourceCode)
+
+          const servertyMap: {
+            [key: string]: number
+          } = {
+            error: monacoRef.current.MarkerSeverity.Error,
+            warning: monacoRef.current.MarkerSeverity.Warning,
+          }
+
+          const severity =
+            servertyMap[error.severity] ||
+            monacoRef.current.MarkerSeverity.Error
+
+          monacoRef.current.editor.setModelMarkers(model, 'compiler', [
+            {
+              startLineNumber: start.lineNumber,
+              startColumn: start.columnNumber,
+              endLineNumber: end.lineNumber,
+              endColumn: end.columnNumber,
+              message: error.formattedMessage,
+              severity: severity,
+            },
+          ])
+        }
+      }
+    })
+
+    // if compiler does not return any errors, run the checker
+    if (checker && !hasError) {
+      const [hasErrors, message] = await checker(result)
+      setHasErrors(hasErrors)
+      if (hasErrors) {
+        // set marker
         if (editorRef.current && monacoRef.current) {
           const model = editorRef.current.getModel()
-          if (model && error.sourceLocation) {
+          if (model) {
+            // set the error at the first line to the end of the file
             const sourceCode = editorRef.current.getValue()
-            const start = offsetToLineColumn(
-              error.sourceLocation.start,
-              sourceCode,
-            )
-            const end = offsetToLineColumn(error.sourceLocation.end, sourceCode)
-
+            const start = { lineNumber: 1, columnNumber: 1 }
+            const end = offsetToLineColumn(sourceCode.length, sourceCode)
             monacoRef.current.editor.setModelMarkers(model, 'compiler', [
               {
                 startLineNumber: start.lineNumber,
                 startColumn: start.columnNumber,
                 endLineNumber: end.lineNumber,
                 endColumn: end.columnNumber,
-                message: error.formattedMessage,
+                message,
                 severity: monacoRef.current.MarkerSeverity.Error,
               },
             ])
           }
         }
-      })
-    } else {
-      if (checker) {
-        const [hasErrors, message] = await checker(result)
-        setHasErrors(hasErrors)
-        if (hasErrors) {
-          // set marker
-          if (editorRef.current && monacoRef.current) {
-            const model = editorRef.current.getModel()
-            if (model) {
-              // set the error at the first line to the end of the file
-              const sourceCode = editorRef.current.getValue()
-              const start = { lineNumber: 1, columnNumber: 1 }
-              const end = offsetToLineColumn(sourceCode.length, sourceCode)
-              monacoRef.current.editor.setModelMarkers(model, 'compiler', [
-                {
-                  startLineNumber: start.lineNumber,
-                  startColumn: start.columnNumber,
-                  endLineNumber: end.lineNumber,
-                  endColumn: end.columnNumber,
-                  message,
-                  severity: monacoRef.current.MarkerSeverity.Error,
-                },
-              ])
-            }
-          }
-          return
-        }
+        return
       }
-
-      // Clear markers if no errors
-      setSuccess(true)
-      setHasErrors(false)
-      setCompilerOutput(result)
-      if (editorRef.current && monacoRef.current) {
-        const model = editorRef.current.getModel()
-        if (model) {
-          monacoRef.current.editor.setModelMarkers(model, 'compiler', [])
-        }
+    }
+    setSuccess(!hasError)
+    setHasErrors(hasError)
+    setCompilerOutput(result)
+    if (hasError || hasWarning) return
+    // Clear markers if no errors
+    if (editorRef.current && monacoRef.current) {
+      const model = editorRef.current.getModel()
+      if (model) {
+        monacoRef.current.editor.setModelMarkers(model, 'compiler', [])
       }
     }
   }, [])
@@ -158,21 +174,6 @@ export default function Editor({
   )
 
   useEffect(() => {
-    if (editorRef.current && monacoRef.current) {
-      // Add custom keybinding
-      editorRef.current.addCommand(
-        monacoRef.current.KeyMod.CtrlCmd |
-          monacoRef.current.KeyMod.Shift |
-          monacoRef.current.KeyCode.KeyS,
-        () => {
-          const sourceCode = editorRef.current?.getValue()
-          if (sourceCode) {
-            compileSourceCode(sourceCode)
-          }
-        },
-      )
-    }
-
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current)
@@ -185,6 +186,24 @@ export default function Editor({
       setCode(sourceCode)
     }
   }, [sourceCode])
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        const isFocused = editorRef.current?.hasTextFocus()
+        if (!isFocused) return
+        e.preventDefault()
+        const sourceCode = editorRef.current?.getValue()
+        if (sourceCode) {
+          compileSourceCode(sourceCode)
+        }
+      }
+    }
+    document.addEventListener('keydown', listener)
+    return () => {
+      document.removeEventListener('keydown', listener)
+    }
+  }, [])
 
   return (
     <div className="relative h-auto rounded-xl border p-5">
@@ -201,6 +220,8 @@ export default function Editor({
         onMount={(editor, monaco) => {
           editorRef.current = editor
           monacoRef.current = monaco
+
+          addSolidityIntellisense(monaco)
         }}
         options={{
           minimap: { enabled: false },
@@ -255,7 +276,7 @@ export default function Editor({
                   <span>Compiled successfully</span>
                 </>
               )}
-              {!hasErrors && !success && 'Compile (Cmd/Ctrl + Shift + S)'}
+              {!hasErrors && !success && 'Compile (Cmd/Ctrl + S)'}
             </span>
           </Transition>
         </div>

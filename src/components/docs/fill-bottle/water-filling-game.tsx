@@ -3,8 +3,65 @@
 import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { useSolidity } from '@/context/solidityContext'
-import { deployContract } from '@/context/solidityContext.utils'
-import { hexToBytes } from '@ethereumjs/util'
+import {
+  buildTransaction,
+  common,
+  deployContract,
+  encodeFunction,
+  getAccountNonce,
+} from '@/context/solidityContext.utils'
+import { Address, hexToBytes } from '@ethereumjs/util'
+import { VM } from '@ethereumjs/vm'
+import { defaultAbiCoder as AbiCoder, Interface } from '@ethersproject/abi'
+import { LegacyTransaction } from '@ethereumjs/tx'
+
+async function callFillBottle(
+  vm: VM,
+  contractAddress: Address,
+  caller: Address,
+  privateKey: Uint8Array,
+) {
+  const data = encodeFunction('fillBottle')
+
+  // send transaction to fill the bottle
+  const txData = {
+    to: contractAddress,
+    data,
+    nonce: await getAccountNonce(vm, privateKey),
+  }
+
+  const tx = LegacyTransaction.fromTxData(
+    buildTransaction(txData as any) as any,
+    {
+      common: common,
+    },
+  ).sign(privateKey)
+
+  const result = await vm.runTx({ tx })
+  if (result.execResult.exceptionError) {
+    throw result.execResult.exceptionError
+  }
+}
+
+async function getWaterLevel(
+  vm: VM,
+  contractAddress: Address,
+): Promise<number> {
+  const sigHash = new Interface(['function checkBottle()']).getSighash(
+    'checkBottle',
+  )
+  const result = await vm.evm.runCall({
+    to: contractAddress,
+    data: hexToBytes(sigHash),
+  })
+
+  if (result.execResult.exceptionError) {
+    throw result.execResult.exceptionError
+  }
+
+  const resultData = AbiCoder.decode(['uint256'], result.execResult.returnValue)
+  return Number(resultData[0])
+}
 
 export default function WaterFillingGameComponent() {
   const [waterLevel, setWaterLevel] = useState(0)
@@ -15,50 +72,62 @@ export default function WaterFillingGameComponent() {
   const maxLevel = 95 // Maximum safe water level
 
   const startFilling = useCallback(async () => {
-    if (gameOver) return
-    if (isCompiling) return
-    if (!account || !vm || !compilerOutput) return
+    try {
+      if (gameOver) return
+      if (isCompiling) return
+      if (!account || !vm || !compilerOutput) return
 
-    // deploy the contract
-    const contract = compilerOutput.contracts['contract.sol']['FillBotGame']
-    const deploymentBytecode = contract.evm.bytecode.object
+      // deploy the contract
+      const contract =
+        compilerOutput.contracts['contract.sol']['FillBottleGame']
+      const deploymentBytecode = contract.evm.bytecode.object
 
-    const contractAddress = await deployContract(
-      vm,
-      hexToBytes(account.privateKey),
-      deploymentBytecode,
-    )
+      const contractAddress = await deployContract(
+        vm,
+        hexToBytes(account.privateKey),
+        deploymentBytecode,
+      )
 
-    console.log('contractAddress', contractAddress)
+      const level = await getWaterLevel(vm, contractAddress)
 
-    const fillInterval = setInterval(() => {
-      console.log('filling')
-      const newWaterLevel = 100
-      setWaterLevel(newWaterLevel)
+      const fillInterval = setInterval(async () => {
+        // fill the bottle
+        await callFillBottle(
+          vm,
+          contractAddress,
+          Address.fromPrivateKey(hexToBytes(account.privateKey)),
+          hexToBytes(account.privateKey),
+        )
+        // get the new water level
+        const newWaterLevel = await getWaterLevel(vm, contractAddress)
+        setWaterLevel(newWaterLevel)
 
-      if (newWaterLevel > 100) {
+        if (newWaterLevel > 100) {
+          clearInterval(fillInterval)
+          setGameOver(true)
+          setScore(0)
+        }
+      }, 32)
+
+      const stopFilling = () => {
         clearInterval(fillInterval)
         setGameOver(true)
-        setScore(0)
+        if (waterLevel <= maxLevel) {
+          setScore(Math.floor(waterLevel))
+        } else {
+          setScore(0)
+        }
       }
-    }, 32)
 
-    const stopFilling = () => {
-      clearInterval(fillInterval)
-      setGameOver(true)
-      if (waterLevel <= maxLevel) {
-        setScore(Math.floor(waterLevel))
-      } else {
-        setScore(0)
+      document.addEventListener('mouseup', stopFilling, { once: true })
+      document.addEventListener('touchend', stopFilling, { once: true })
+
+      return () => {
+        document.removeEventListener('mouseup', stopFilling)
+        document.removeEventListener('touchend', stopFilling)
       }
-    }
-
-    document.addEventListener('mouseup', stopFilling, { once: true })
-    document.addEventListener('touchend', stopFilling, { once: true })
-
-    return () => {
-      document.removeEventListener('mouseup', stopFilling)
-      document.removeEventListener('touchend', stopFilling)
+    } catch (e: any) {
+      alert(e.message)
     }
   }, [gameOver, waterLevel, maxLevel, isCompiling, compilerOutput, account, vm])
 

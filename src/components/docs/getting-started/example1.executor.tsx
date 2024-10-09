@@ -7,11 +7,17 @@ import { Address, hexToBytes } from '@ethereumjs/util'
 import { VM } from '@ethereumjs/vm'
 import { defaultAbiCoder as AbiCoder, Interface } from '@ethersproject/abi'
 import { Transition } from '@headlessui/react'
+import { Contract } from 'ethers'
 import { Loader2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 // call hello function
-async function callHello(vm: VM, contractAddress: Address, caller: Address) {
+async function callHello(
+  vm: VM,
+  contractAddress: Address,
+  caller: Address,
+  abi: any[],
+) {
   const sigHash = new Interface(['function hello()']).getSighash('hello')
   const result = await vm.evm.runCall({
     caller,
@@ -52,6 +58,7 @@ export default function Example1Executor() {
       }
 
       const contract = compilerOutput.contracts['contract.sol']['HelloWorld']
+      const abi = contract.abi
       const deploymentBytecode = contract.evm.bytecode.object
 
       const contractAddress = await deployContract(
@@ -63,6 +70,7 @@ export default function Example1Executor() {
         vm,
         contractAddress,
         Address.fromPrivateKey(hexToBytes(account.privateKey)),
+        abi,
       )
       setResult(newResult)
     } catch (e: any) {

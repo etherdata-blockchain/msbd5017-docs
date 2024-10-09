@@ -1,5 +1,7 @@
+'use client'
+
 import Editor from '@/components/solc/Editor'
-import { source } from '../source-code/fill-bottle.solc'
+import { checker, source } from '../source-code/fill-bottle.solc'
 import WaterFillingGameComponent from './water-filling-game'
 import dynamic from 'next/dynamic'
 
@@ -16,7 +18,7 @@ export default function FillBottleExample() {
     <SolidityContextProvider>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="col-span-2">
-          <Editor sourceCode={source} height="900px" />
+          <Editor sourceCode={source} height="900px" checker={checker} />
         </div>
         <div className="col-span-1">
           <WaterFillingGameComponent />
