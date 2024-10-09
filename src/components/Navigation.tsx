@@ -12,18 +12,8 @@ import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { remToPx } from '@/lib/remToPx'
 
-export interface NavLink {
-  title: string
-  href: string
-}
-
-export interface NavGroup {
-  title: string
-  links: (NavLink | NavGroup)[]
-}
-
 // Assume navigation is imported from somewhere
-import { navigation } from '@/navigation'
+import { NavGroup, navigation } from '@/navigation'
 
 function useInitialValue<T>(value: T, condition = true) {
   let initialValue = useRef(value).current
@@ -106,7 +96,7 @@ function VisibleSectionHighlight({
       (section) => section.id === visibleSections[0],
     ),
   )
-  let itemHeight = remToPx(2)
+  let itemHeight = 20
   let height = isPresent
     ? Math.max(1, visibleSections.length) * itemHeight
     : itemHeight
@@ -220,36 +210,6 @@ function NavigationGroup({
               ) : (
                 <NavigationGroup group={link} level={level + 1} />
               )}
-              <AnimatePresence mode="popLayout" initial={false}>
-                {'href' in link &&
-                  link.href === pathname &&
-                  sections.length > 0 && (
-                    <motion.ul
-                      role="list"
-                      initial={{ opacity: 0 }}
-                      animate={{
-                        opacity: 1,
-                        transition: { delay: 0.1 },
-                      }}
-                      exit={{
-                        opacity: 0,
-                        transition: { duration: 0.15 },
-                      }}
-                    >
-                      {sections.map((section) => (
-                        <li key={section.id}>
-                          <NavLink
-                            href={`${link.href}#${section.id}`}
-                            tag={section.tag}
-                            isAnchorLink
-                          >
-                            {section.title}
-                          </NavLink>
-                        </li>
-                      ))}
-                    </motion.ul>
-                  )}
-              </AnimatePresence>
             </motion.li>
           ))}
         </ul>

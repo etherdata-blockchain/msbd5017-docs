@@ -12,7 +12,9 @@ class MDXMenuPlugin {
       (compilation, callback) => {
         const appDir = path.join(compiler.context, 'src', 'app')
         const menu = this.buildMenu(appDir)
-        const tsContent = this.generateTypeScriptContent(menu)
+        // Filter out the 'app' entry and only keep its links
+        const filteredMenu = menu && menu.title === 'app' ? menu.links : menu
+        const tsContent = this.generateTypeScriptContent(filteredMenu)
         const outputPath = path.join(
           compiler.context,
           'src',
@@ -38,36 +40,42 @@ class MDXMenuPlugin {
   }
 
   buildMenu(dir, baseHref = '') {
-    const menu = []
     const files = fs.readdirSync(dir)
+    const pageFile = files.find((file) => file === 'page.mdx')
 
+    if (pageFile) {
+      const filePath = path.join(dir, pageFile)
+      const content = fs.readFileSync(filePath, 'utf-8')
+      const { data } = matter(content)
+      const title = data.title || path.basename(dir)
+      const href = '/' + baseHref.replace(/\\/g, '/')
+
+      if (title !== 'app') {
+        return { title, href }
+      }
+    }
+
+    const subItems = []
     for (const file of files) {
       const filePath = path.join(dir, file)
       const stat = fs.statSync(filePath)
 
       if (stat.isDirectory()) {
-        const subMenu = this.buildMenu(filePath, path.join(baseHref, file))
-        if (subMenu.length > 0) {
-          menu.push({
-            title: file,
-            links: subMenu,
-          })
+        const subItem = this.buildMenu(filePath, path.join(baseHref, file))
+        if (subItem) {
+          subItems.push(subItem)
         }
-      } else if (file === 'page.mdx') {
-        const content = fs.readFileSync(filePath, 'utf-8')
-        const { data } = matter(content)
-        const title = data.title || path.basename(dir)
-        const href = '/' + baseHref.replace(/\\/g, '/')
-
-        if (title === 'app') {
-          continue
-        }
-
-        menu.push({ title, href })
       }
     }
 
-    return menu
+    if (subItems.length > 0) {
+      return {
+        title: path.basename(dir),
+        links: subItems,
+      }
+    }
+
+    return null
   }
 
   generateTypeScriptContent(menu) {

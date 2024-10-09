@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/mdx/mdx-menu-plugin.mjs"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/mdx/mdx-menu-plugin.mjs", "src/mdx/mdx-menu-plugin.spec.ts"],
   "exclude": ["node_modules"]
 }
