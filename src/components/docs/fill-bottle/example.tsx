@@ -1,8 +1,6 @@
 'use client'
 
-import Editor from '@/components/solc/Editor'
 import { checker, source } from '../source-code/fill-bottle.solc'
-import WaterFillingGameComponent from './water-filling-game'
 import dynamic from 'next/dynamic'
 
 const SolidityContextProvider = dynamic(
@@ -10,6 +8,13 @@ const SolidityContextProvider = dynamic(
     import('@/context/solidityContext').then(
       (mod) => mod.SolidityContextProvider,
     ),
+  { ssr: false },
+)
+
+const Editor = dynamic(() => import('@/components/solc/Editor'), { ssr: false })
+
+const WaterFillingGameComponent = dynamic(
+  () => import('./water-filling-game'),
   { ssr: false },
 )
 

@@ -1,8 +1,6 @@
 'use client'
 
 import { source, checker } from '@/components/docs/source-code/helloworld.solc'
-import Editor from '@/components/solc/Editor'
-import Example1Executor from './example1.executor'
 import dynamic from 'next/dynamic'
 
 const SolidityContextProvider = dynamic(
@@ -12,6 +10,12 @@ const SolidityContextProvider = dynamic(
     ),
   { ssr: false },
 )
+
+const Editor = dynamic(() => import('@/components/solc/Editor'), { ssr: false })
+
+const Example1Executor = dynamic(() => import('./example1.executor'), {
+  ssr: false,
+})
 
 export default function Example1() {
   return (
