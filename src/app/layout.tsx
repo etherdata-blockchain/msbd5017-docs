@@ -2,15 +2,15 @@ import { type Metadata } from 'next'
 import glob from 'fast-glob'
 
 import { Providers } from '@/app/providers'
-import { Layout } from '@/components/Layout'
-import { type Section } from '@/components/SectionProvider'
+import { Layout } from '@/components/shared/Layout'
+import { type Section } from '@/components/shared/SectionProvider'
 
 import '@/styles/tailwind.css'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - Protocol API Reference',
-    default: 'Protocol API Reference',
+    template: 'MSBD5017 - %s',
+    default: 'MSBD5017 Document',
   },
 }
 

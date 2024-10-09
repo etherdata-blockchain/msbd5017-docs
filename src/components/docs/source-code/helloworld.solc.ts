@@ -1,6 +1,7 @@
 import { Checker, CompilerOutput } from '@/lib/interfaces'
 
-export const HELLOWORLD_SOLC = `// SPDX-License-Identifier: MIT
+
+export const source = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract HelloWorld {

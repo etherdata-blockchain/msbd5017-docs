@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { Button } from '@/components/Button'
+import { Button } from '@/components/shared/Button'
 import { navigation } from '@/navigation'
 
 function PageLink({

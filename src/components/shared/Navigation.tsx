@@ -6,10 +6,10 @@ import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 
-import { Button } from '@/components/Button'
-import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
-import { useSectionStore } from '@/components/SectionProvider'
-import { Tag } from '@/components/Tag'
+import { Button } from '@/components/shared/Button'
+import { useIsInsideMobileNavigation } from '@/components/shared/MobileNavigation'
+import { useSectionStore } from '@/components/shared/SectionProvider'
+import { Tag } from '@/components/shared/Tag'
 import { remToPx } from '@/lib/remToPx'
 
 // Assume navigation is imported from somewhere

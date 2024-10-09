@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@/components/Button'
+import { Button } from '@/components/shared/Button'
 import { useSolidity } from '@/context/solidityContext'
 import { deployContract } from '@/context/solidityContext.utils'
 import { Address, hexToBytes } from '@ethereumjs/util'

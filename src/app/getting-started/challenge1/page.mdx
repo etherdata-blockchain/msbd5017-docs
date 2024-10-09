@@ -1,0 +1,55 @@
+---
+title: Challenge 1 - Help me fill the bottle
+description: Help me fill the bottle
+---
+
+import Example from '@/components/docs/fill-bottle/example'
+
+# Yanami's Thirst Problem
+
+**Yanami** is a cheerful girl with a passion for food. In fact, there are three things in the world that she loves most:
+
+1. Food
+2. More food
+3. Even more food!
+
+However, Yanami's love for eating has led to an unexpected problem. She's eaten so much that now she's incredibly thirsty!
+
+You are **Nukumizu**, Yanami's good friend, and you've decided to help her out. Your mission is to fill her water bottle, but there's a catch:
+
+> [!Danger] You only have one chance to fill the bottle correctly!
+
+If you don't succeed, Yanami will be upset. She's even made a rather extreme promise: she'll eat your lunch every day for the next month if you fail!
+
+To protect your future meals (and your friendship), you swear to yourself:
+
+> "I will fill the bottle perfectly - not too little, not too much!"
+
+## Your Challenge
+
+Can you help Nukumizu fill Yanami's bottle with the exact amount of water needed? Remember, you must:
+
+- Fill the bottle as much as possible
+- Avoid overfilling it
+- Do it in just one attempt
+
+Good luck! Yanami's thirst and your future lunches depend on your success!
+
+# The Bottle Filling Game
+
+In this example, we will implement a smart contract named `WaterBottle` that has two functions:
+
+1. `fillBottle(uint256 amount)`: This function fills the bottle with the specified amount of water. The maximum amount is 100.
+2. `checkBottle()`: This function checks the current water level in the bottle. Maximum water level is 100.
+
+When acomplishing the challenge, you should be able to interact with the mini game below.
+
+**Try you best to get as high score as possible!**
+
+{' '}
+
+> [!tip]
+> You can store the water level in the bottle using a state variable in the smart contract.
+> The state variable should be of type `uint256` and should be initialized to 0.
+
+<Example />
