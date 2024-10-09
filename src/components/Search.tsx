@@ -176,12 +176,12 @@ function SearchResult({
   let id = useId()
 
   let sectionTitle = navigation.find((section) =>
-    section.links.find((link) => {
+    section.links?.find((link) => {
       if ('href' in link) {
         return link.href === result.url
       }
 
-      return link.links.find((sublink) => {
+      return link.links?.find((sublink) => {
         if ('href' in sublink) {
           return sublink.href === result.url
         }
