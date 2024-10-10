@@ -1,17 +1,18 @@
 'use client'
 
-import { Button } from '@/components/shared/Button'
+import { Button } from '@/components/ui/button'
 import { useSolidity } from '@/context/solidityContext'
-import { deployContract } from '@/context/solidityContext.utils'
+import {
+  decodeRevertMessage,
+  deployContract,
+} from '@/context/solidityContext.utils'
 import { Address, hexToBytes } from '@ethereumjs/util'
 import { VM } from '@ethereumjs/vm'
 import { defaultAbiCoder as AbiCoder, Interface } from '@ethersproject/abi'
-import { Transition } from '@headlessui/react'
-import { Contract } from 'ethers'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 
-// call hello function
 async function callHello(
   vm: VM,
   contractAddress: Address,
@@ -27,7 +28,8 @@ async function callHello(
   })
 
   if (result.execResult.exceptionError) {
-    throw result.execResult.exceptionError
+    const message = decodeRevertMessage(result.execResult.returnValue)
+    throw new Error(message)
   }
 
   const resultData = AbiCoder.decode(['string'], result.execResult.returnValue)
@@ -37,20 +39,15 @@ async function callHello(
 export default function Example1Executor() {
   const { compilerOutput, account, vm, isCompiling } = useSolidity()
   const [result, setResult] = useState<string | null>(null)
+  const [previousResult, setPreviousResult] = useState<string | null>(null)
   const [isRunning, setIsRunning] = useState(false)
-  const [showResult, setShowResult] = useState(false)
-
-  useEffect(() => {
-    if (result) {
-      const timer = setTimeout(() => setShowResult(true), 300) // Delay showing result
-      return () => clearTimeout(timer)
-    }
-  }, [result])
+  const [displayText, setDisplayText] = useState('')
+  const [highlightedText, setHighlightedText] = useState('')
+  const [shouldAnimate, setShouldAnimate] = useState(false)
 
   const deployAndRun = useCallback(async () => {
     setIsRunning(true)
-    setShowResult(false)
-    setResult(null)
+    setShouldAnimate(false)
 
     try {
       if (compilerOutput === null || !account || !vm) {
@@ -71,61 +68,112 @@ export default function Example1Executor() {
         contractAddress,
         Address.fromPrivateKey(hexToBytes(account.privateKey)),
         abi,
-      )
+      ).catch((e) => {
+        alert(e.message)
+        return null
+      })
+      setPreviousResult(result)
       setResult(newResult)
     } catch (e: any) {
       alert(e.message)
     } finally {
       setIsRunning(false)
+      setShouldAnimate(true)
     }
-  }, [compilerOutput, account, vm])
+  }, [compilerOutput, account, vm, result])
+
+  useEffect(() => {
+    if (shouldAnimate && result) {
+      const animateText = async () => {
+        if (!previousResult) {
+          // If there's no previous result, just type out the new result without highlighting
+          for (let i = 0; i <= result.length; i++) {
+            setDisplayText(result.slice(0, i))
+            await new Promise((resolve) => setTimeout(resolve, 50))
+          }
+          setHighlightedText('')
+        } else {
+          // Find the first differing character
+          let diffIndex = 0
+          while (
+            diffIndex < previousResult.length &&
+            diffIndex < result.length &&
+            previousResult[diffIndex] === result[diffIndex]
+          ) {
+            diffIndex++
+          }
+
+          // Erase the different part
+          for (let i = previousResult.length; i > diffIndex; i--) {
+            setDisplayText(previousResult.slice(0, i))
+            await new Promise((resolve) => setTimeout(resolve, 50))
+          }
+
+          // Type the new part
+          for (let i = diffIndex; i <= result.length; i++) {
+            setDisplayText(result.slice(0, i))
+            setHighlightedText(result.slice(diffIndex, i))
+            await new Promise((resolve) => setTimeout(resolve, 50))
+          }
+        }
+      }
+      animateText()
+    }
+  }, [shouldAnimate, result, previousResult])
 
   if (compilerOutput === null) {
     return null
   }
 
   return (
-    <div className="font-md mt-2 flex h-20 flex-row items-center justify-between rounded-2xl border p-5 text-lg">
+    <div className="mt-2 flex h-20 flex-row items-center justify-between rounded-2xl border p-5 text-lg font-medium">
       <div className="flex-1">
-        <Transition
-          show={isRunning}
-          enter="transition-opacity duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="transition-opacity duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div>
-            <Loader2 className="animate-spin" size={24} />
-          </div>
-        </Transition>
-
-        <Transition
-          show={showResult && !!result}
-          enter="transition-opacity duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="transition-opacity duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <span>
-            <span className="font-bold">Smart contract says</span>: {result}
-          </span>
-        </Transition>
-
-        <Transition
-          show={!isRunning && !result}
-          enter="transition-opacity duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="transition-opacity duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <span>Click the button to deploy and run the contract</span>
-        </Transition>
+        <AnimatePresence mode="wait">
+          {isRunning ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+            >
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </motion.div>
+          ) : result ? (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+            >
+              <span className="font-bold">Smart contract says</span>:{' '}
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.1 }}
+              >
+                {displayText.slice(
+                  0,
+                  displayText.length - highlightedText.length,
+                )}
+                {highlightedText && (
+                  <span className="bg-yellow-200">{highlightedText}</span>
+                )}
+              </motion.span>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="instruction"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+            >
+              Click the button to deploy and run the contract
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div>

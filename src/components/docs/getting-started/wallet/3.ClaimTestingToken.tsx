@@ -7,7 +7,7 @@ import { useWallet } from 'web3-connect-react'
 const minimumBalance = 10
 
 export default function ClaimTestingToken({ session }: { session?: any }) {
-  const { isSignedIn, chainId, balance } = useWallet()
+  const { chainId, balance, walletAddress } = useWallet()
   const isAuth = session === undefined ? false : session.isAuth
   if (!isAuth) {
     return <></>
@@ -26,14 +26,18 @@ export default function ClaimTestingToken({ session }: { session?: any }) {
       {Number(balance) < minimumBalance ? (
         <div className="flex w-full flex-row items-center justify-between">
           <>
-            <span>
-              You have less than {minimumBalance} {axiomGemeni.symbol} in your
-              wallet. Claim
-              {axiomGemeni.networkName} network.
+            <span className="max-w-2xl">
+              Currently, you only have <b>{balance}</b> {axiomGemeni.symbol} in
+              your wallet. Which is less than the minimum required balance of{' '}
+              <b>{minimumBalance}</b> {axiomGemeni.symbol}. You can claim some{' '}
+              {axiomGemeni.symbol} from the faucet.
             </span>
             <Button
               onClick={() => {
-                window.open('https://faucet.gemini.axiomesh.io', '_blank')
+                window.open(
+                  `https://faucet.gemini.axiomesh.io/home?address=${walletAddress}`,
+                  '_blank',
+                )
               }}
             >
               Claim Token

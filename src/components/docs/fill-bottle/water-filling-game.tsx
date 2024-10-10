@@ -6,6 +6,7 @@ import { useSolidity } from '@/context/solidityContext'
 import {
   buildTransaction,
   common,
+  decodeRevertMessage,
   deployContract,
   encodeFunction,
   getAccountNonce,
@@ -39,7 +40,8 @@ async function callFillBottle(
 
   const result = await vm.runTx({ tx })
   if (result.execResult.exceptionError) {
-    throw result.execResult.exceptionError
+    const message = decodeRevertMessage(result.execResult.returnValue)
+    throw new Error(message)
   }
 }
 
@@ -56,7 +58,8 @@ async function getWaterLevel(
   })
 
   if (result.execResult.exceptionError) {
-    throw result.execResult.exceptionError
+    const message = decodeRevertMessage(result.execResult.returnValue)
+    throw new Error(message)
   }
 
   const resultData = AbiCoder.decode(['uint256'], result.execResult.returnValue)
@@ -97,9 +100,17 @@ export default function WaterFillingGameComponent() {
           contractAddress,
           Address.fromPrivateKey(hexToBytes(account.privateKey)),
           hexToBytes(account.privateKey),
-        )
+        ).catch((e) => {
+          alert(e.message)
+          throw e
+        })
         // get the new water level
-        const newWaterLevel = await getWaterLevel(vm, contractAddress)
+        const newWaterLevel = await getWaterLevel(vm, contractAddress).catch(
+          (e) => {
+            alert(e.message)
+            throw e
+          },
+        )
         setWaterLevel(newWaterLevel)
 
         if (newWaterLevel > 100) {

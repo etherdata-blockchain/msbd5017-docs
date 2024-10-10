@@ -20,10 +20,24 @@ const nextConfig = {
   experimental: {
     outputFileTracingIncludes: {
       '/**/*': ['./src/app/**/*.mdx'],
+      '/**/*': ['./node_modules/@openzeppelin/contracts/**/*.sol'],
     },
   },
   webpack: (config, options) => {
     config.plugins.push(new MDXMenuPlugin())
+
+    // Leave @openzeppelin packages as external
+    config.externals = [
+      function (context, request, callback) {
+        if (/^@openzeppelin\//.test(request)) {
+          // Externalize @openzeppelin packages
+          return callback(null, 'commonjs ' + request)
+        }
+        callback()
+      },
+      ...config.externals,
+    ]
+
     return config
   },
 }

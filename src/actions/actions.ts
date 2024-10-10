@@ -4,29 +4,54 @@ import { ethers } from 'ethers'
 import { cookies } from 'next/headers'
 //@ts-expect-error
 import solc from 'solc'
+import fs from 'fs'
+import path from 'path'
 
 const SessionKey = 'session'
 
-export async function compile(sourceCode: string): Promise<CompilerOutput> {
-  const input = {
-    language: 'Solidity',
-    sources: {
-      'contract.sol': {
-        content: sourceCode,
-      },
-    },
-    settings: {
-      outputSelection: {
-        '*': {
-          '*': ['abi', 'evm.bytecode'],
+export async function compile(
+  sourceCode: string,
+): Promise<CompilerOutput | { error: string }> {
+  try {
+    const fileName = 'contract.sol'
+
+    const input = {
+      language: 'Solidity',
+      sources: {
+        [fileName]: {
+          content: sourceCode,
         },
       },
-    },
+      settings: {
+        outputSelection: {
+          '*': {
+            '*': ['abi', 'evm.bytecode'],
+          },
+        },
+      },
+    }
+
+    const output = solc.compile(JSON.stringify(input), {
+      import: (url: string) => {
+        const filePath = path.join(process.cwd(), 'node_modules', url)
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(
+            path.join(process.cwd(), 'node_modules', url),
+            'utf8',
+          )
+          return { contents: content }
+        } else {
+          return { error: `File not found: ${url}` }
+        }
+      },
+    })
+    return JSON.parse(output)
+  } catch (error: any) {
+    console.error(error)
+    return {
+      error: error.message,
+    }
   }
-
-  const output = solc.compile(JSON.stringify(input))
-
-  return JSON.parse(output)
 }
 
 export async function session() {

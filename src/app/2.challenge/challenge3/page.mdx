@@ -1,0 +1,83 @@
+---
+title: Challenge 3 - Mad scientist and Future Gadget Lab
+description: Mad scientist and Future Gadget Lab
+---
+
+import Example from '@/components/docs/mad-scientist/example'
+
+export const metadata = {
+  title: 'Mad scientist and Future Gadget Lab',
+  description: 'Help Okabe and the Future Gadget Lab members to save the world',
+}
+
+# The Mad Scientist and His Future Gadget Lab
+
+In the bustling Akihabara district of Tokyo, a self-proclaimed mad scientist named **Okabe Rintarou**, better known by his alias **Hououin Kyouma**, founded the `Future Gadget Lab`. This eccentric workshop was destined to birth his greatest invention: the `PhoneWave (name subject to change), aka time machine`.
+
+Okabe's relatively peaceful life takes a dark turn when Makise Kurisu, a brilliant young scientist, is found dead in Akihabara. This event sets off a chain reaction, spiraling towards a catastrophic World War III in the future.
+
+Determined to prevent the war, Okabe decides to construct a time machine, aiming to alter the course of history and, in his words, **"Hacking to the gate"**.
+
+## Project Phoenix: Funding the Future
+
+However, Okabe's ambitious plan faces a significant hurdle: **funding**. His calculations indicate a need for at least **$100,000 USD**, equivalent to **100 AXC**, needed to complete the time machine and prevent World War III.
+
+To secure this funding, Okabe initiates `Project Phoenix` - a name symbolizing the potential rebirth of a peaceful world. The project's funding mechanism works as follows:
+
+- Investors can lock `AXC` into a smart contract.
+- For every 10 `AXC` locked, the investor receives 100 `FGT` (Future Gadget Tokens).
+- `FGT` can be redeemed upon the successful completion of the `Time Machine`.
+
+> [!NOTE]
+> The smart contract is so secure, even time travel can't mess with it. (at least, according to Okabe's funding statement).
+
+## The Smart Contract Challenge
+
+Okabe lacks the technical expertise to create the necessary smart contract for Project Phoenix and this is where you come in - can you help this `mad scientist` craft a smart contract that might just save the world?
+
+Your mission is to develop a smart contract that can:
+
+1. Accept and lock `AXC` deposits
+2. Calculate and distribute `FGT` rewards **(Seperate contract)**
+3. Lock the `FGT` rewards until the Time Machine is completed **(Let's say Year 2036)**
+
+The smart contract implementation details as follows:
+
+## Smart Contract Requirements
+
+1. **Contract Creation**
+
+   - Develop two smart contracts:
+     - `Lock` contract
+     - `FGT` contract (an ERC20 token)
+
+2. **Lock Contract**
+
+   - Implement a `lockAXC` function:
+     - Must be payable
+     - Each call costs 10 AXC
+     - Deposit limit: 100 AXC
+     - Reject new deposits when limit is reached
+
+3. **Deposit Tracking**
+
+   - Add a `totalDeposits` function to the `Lock` contract:
+     - Returns the total amount of AXC deposited
+
+4. **Token Minting**
+
+   - Restrict `FGT` token minting:
+     - Only the `Lock` contract can mint `FGT` tokens
+
+5. **Token Redemption**
+
+   - Implement a `redeem` function in the `FGT` contract:
+     - Allows users to redeem their `FGT` tokens
+     - Only owner of the `FGT` contract can redeem tokens
+     - Redemption only possible after 2036
+
+6. **Transfer Restriction**
+   - Implement transfer restrictions in the `FGT` contract:
+     - Users cannot transfer their balance to others before 2036
+
+<Example />
