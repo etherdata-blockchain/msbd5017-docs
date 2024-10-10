@@ -12,6 +12,7 @@ import {
 import { useMobileNavigationStore } from '@/components/shared/MobileNavigation'
 import { MobileSearch, Search } from '@/components/shared/Search'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import ConnectWalletButton from './ConnectWalletButton'
 
 function TopLevelNavItem({
   href,
@@ -91,7 +92,7 @@ export const Header = forwardRef<
           <ThemeToggle />
         </div>
         <div className="hidden min-[416px]:contents">
-          <Button href="#">Connect Wallet</Button>
+          <ConnectWalletButton />
         </div>
       </div>
     </motion.div>

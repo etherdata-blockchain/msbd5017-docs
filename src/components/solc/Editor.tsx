@@ -5,11 +5,12 @@ import { Checker } from '@/lib/interfaces'
 import { Transition } from '@headlessui/react'
 import { CircleAlertIcon, CircleCheck, Loader2 } from 'lucide-react'
 import { editor } from 'monaco-editor'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../shared/Button'
 import dynamic from 'next/dynamic'
 import { addSolidityIntellisense } from './editor.utils'
 import { Monaco } from '@monaco-editor/react'
+import { useTheme } from 'next-themes'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -53,6 +54,7 @@ export default function Editor({
   const [success, setSuccess] = useState(false)
   const { setCompilerOutput, isCompiling, setIsCompiling } = useSolidity()
   const [code, setCode] = useState(sourceCode)
+  const { theme } = useTheme()
 
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -205,12 +207,23 @@ export default function Editor({
     }
   }, [])
 
+  const vscodeTheme = useMemo(() => {
+    let media = window.matchMedia('(prefers-color-scheme: dark)')
+    if (theme === 'system') {
+      return media.matches ? 'vs-dark' : 'light'
+    }
+
+    return theme === 'dark' ? 'vs-dark' : 'light'
+  }, [theme])
+
   return (
-    <div className="relative h-auto rounded-xl border p-5">
+    <div className="relative h-auto space-y-2 rounded-xl border p-5">
       <MonacoEditor
         language="sol"
         value={code}
         height={height}
+        theme={vscodeTheme}
+        className="rounded-xl"
         onChange={(value) => {
           setCode(value)
           if (value) {
