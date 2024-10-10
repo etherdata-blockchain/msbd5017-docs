@@ -150,7 +150,7 @@ export default function Editor({
     }
     setSuccess(!hasError)
     setHasErrors(hasError)
-    setCompilerOutput(result)
+    if (!hasError) setCompilerOutput(result)
     if (hasError || hasWarning) return
     // Clear markers if no errors
     if (editorRef.current && monacoRef.current) {

@@ -3,6 +3,8 @@ title: Challenge 2 - Subaru's Vote
 description: Subaru's Vote
 ---
 
+import Example from '@/components/docs/royal-selection/example'
+
 # Subaru's Royal Selection Voting Website
 
 In the heart of the city, **Subaru**, a cheerful young man, contemplates the upcoming **Royal Selection**. Concerned about the fairness of the process and the kingdom's future, he comes up with an innovative idea.
@@ -34,9 +36,11 @@ With this system, Subaru hopes to engage more citizens in the Royal Selection pr
 
 ```solidity
 struct Candidate {
+    uint256 id;
+    uint256 votes;
     string name;
     string description;
-    uint256 voteCount;
+    string imageUrl;
 }
 ```
 
@@ -45,6 +49,8 @@ This struct is used to store information about each candidate in the election. I
 - `name`: A string representing the candidate's name.
 - `description`: A string providing a brief description of the candidate.
 - `voteCount`: An unsigned integer tracking the number of votes received by the candidate.
+- `imageUrl`: A string representing the URL of an image associated with the candidate.
+- `id`: A unique identifier for the candidate.
 
 ## Functions
 
@@ -53,3 +59,5 @@ This struct is used to store information about each candidate in the election. I
 2. `getAllCandidates()`: This function retrieves information for all candidates participating in the election. It returns an array of `Candidate` structs, each containing the candidate's name, description, and current vote count. This allows users to view the complete list of candidates and their current standings in a single call.
 
 These elements provide the core structure and functionality for Subaru's voting system, allowing for efficient storage of candidate information and enabling users to participate in the election and view information for all candidates at once.
+
+<Example />

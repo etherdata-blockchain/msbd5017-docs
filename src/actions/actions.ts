@@ -20,8 +20,6 @@ export async function compile(sourceCode: string): Promise<CompilerOutput> {
     },
   }
 
-  console.log(solc.version())
-
   const output = solc.compile(JSON.stringify(input))
 
   return JSON.parse(output)
