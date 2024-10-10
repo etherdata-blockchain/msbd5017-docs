@@ -1,9 +1,12 @@
+import { signIn as serverSignIn, storeSession } from '@/actions/actions'
+import { X } from 'lucide-react'
 import { cloneElement, useCallback, useState } from 'react'
 import {
   AvailableProvider,
   useWallet,
   WalletProvider,
 } from 'web3-connect-react'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   closeModal: () => void
@@ -27,8 +30,8 @@ function WalletItem({
   provider: WalletProvider
   closeModal: () => void
 }) {
-  const Image = cloneElement(provider.metadata.image as any, {
-    className: 'rounded-lg p-1',
+  const image = cloneElement(provider.metadata.image as any, {
+    className: 'rounded-lg !h-5 !w-5 !object-cover',
   })
 
   const { sdk, signIn } = useWallet()
@@ -39,9 +42,20 @@ function WalletItem({
       setIsLoading(true)
       await signIn(provider, {
         onSignedIn: async (walletAddress, provider, session) => {
-          sessionStorage.setItem('session', JSON.stringify(session))
+          const { error } = await storeSession(walletAddress, session)
+          if (error) {
+            throw new Error(error)
+          }
         },
         getSignInData: async (address, provider) => {
+          const message = 'Sign In to MSBD 5017 website'
+          const signature = await provider.signMessage(message, {
+            forAuthentication: true,
+          })
+          const { error } = await serverSignIn(address, message, signature)
+          if (error) {
+            throw new Error(error)
+          }
           return {}
         },
       })
@@ -57,12 +71,7 @@ function WalletItem({
 
   const handleClick = () => {
     if (!provider.isEnabled(sdk.walletProviders)) {
-      console.log(provider.metadata)
-      if (provider.metadata.name.toLowerCase() === 'okx') {
-        window.open('https://www.okx.com/zh-hans/download')
-      } else {
-        window.open('https://metamask.io/')
-      }
+      window.open(provider.metadata.downloadLink, '_blank')
       closeModal()
     } else {
       onSignIn(provider.metadata.name)
@@ -70,7 +79,13 @@ function WalletItem({
   }
 
   return (
-    <li key={provider.metadata.name} className={'h-[80px] w-full'}>
+    <li
+      key={provider.metadata.name}
+      className={'h-[80px] w-full'}
+      style={{
+        listStyle: 'none',
+      }}
+    >
       <button
         // disabled={!provider.isEnabled(sdk.walletProviders)}
         onClick={handleClick}
@@ -81,11 +96,11 @@ function WalletItem({
         <div className={'flex w-full flex-row justify-between'}>
           <div className={'flex flex-row items-center space-x-2'}>
             <div
-              className={`h-6 w-6 rounded-lg ${provider.metadata.name === 'MetaMask' ? 'bg-[#EAE0D7]' : 'bg-black'}`}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg ${provider.metadata.name === 'MetaMask' ? 'bg-[#EAE0D7]' : 'bg-black'}`}
             >
-              {Image}
+              {image}
             </div>
-            <label className={'text-sm font-bold text-[#111827]'}>
+            <label className={'text-sm font-bold'}>
               {provider.metadata.name} Wallet
             </label>
           </div>
@@ -120,25 +135,16 @@ export function ConnectWalletModal({ closeModal }: Props) {
             closeModal()
           }}
         >
-          <div>close</div>
+          <X />
         </button>
         {!isSignedIn && (
-          <img
-            src={'/assets/logo1.png'}
-            alt={'logo'}
-            className={'mx-auto'}
-            width={90}
-            height={35}
-          />
-        )}
-        {!isSignedIn && (
           <>
-            <h1 className={'text-center text-2xl font-bold text-[#111827]'}>
-              Sign In To WYT
+            <h1 className={'text-center text-2xl font-bold text-primary'}>
+              Sign In To MSBD 5017 Website
             </h1>
-            <p className={'text-left text-sm font-normal text-[#6B7280]'}>
-              Get started with your wallet. By signing in to WYT, you agree to
-              our Terms of Service and Privacy Policy.
+            <p className={'text-left text-sm font-normal'}>
+              Click on the wallet provider you would like to use to sign in to
+              the MSBD 5017 website
             </p>
             <ul className={'mt-5 space-y-5'}>
               {sdk?.walletProviders
@@ -151,24 +157,24 @@ export function ConnectWalletModal({ closeModal }: Props) {
         )}
 
         {isSignedIn && (
-          <>
-            <h1 className={'text-2xl font-bold text-[#111827]'}>My Account</h1>
-            <div className={'flex flex-row items-center space-x-2'}>
+          <div className="w-[300px]">
+            <h1 className={'text-2xl font-bold'}>My Account</h1>
+            <div className={'flex flex-row items-center space-x-2 py-2'}>
               <div></div>
               <div className={'flex flex-col'}>
-                <p className={'text-gray-500'}>Address</p>
-                <p>{omitMiddle(walletAddress, 8)}</p>
+                <span className={''}>Address</span>
+                <span>{omitMiddle(walletAddress ?? '', 8)}</span>
               </div>
             </div>
-            <button
+            <Button
               onClick={signOut}
               className={
-                'flex w-full flex-row justify-between rounded-[10px] bg-[#F7FAFC] p-[15px] pb-[15px] pl-5 pr-[35px] text-[#718096] disabled:cursor-not-allowed'
+                'flex w-full flex-row justify-between rounded-lg disabled:cursor-not-allowed'
               }
             >
               <span>Sign out</span>
-            </button>
-          </>
+            </Button>
+          </div>
         )}
       </div>
     </div>

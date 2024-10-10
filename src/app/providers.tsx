@@ -8,6 +8,7 @@ import {
   OKXProvider,
   WalletContextProvider,
 } from 'web3-connect-react'
+import { signOut } from '@/actions/actions'
 
 function ThemeWatcher() {
   let { resolvedTheme, setTheme } = useTheme()
@@ -47,7 +48,9 @@ export function Providers({
         <WalletContextProvider
           session={session}
           providers={[OKXProvider, MetaMaskProvider]}
-          onSignedOut={async () => {}}
+          onSignedOut={async () => {
+            await signOut()
+          }}
           listenToAccountChanges={false}
           listenToChainChanges={false}
         >

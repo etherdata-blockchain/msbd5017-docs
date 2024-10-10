@@ -6,6 +6,7 @@ import { Layout } from '@/components/shared/Layout'
 import { type Section } from '@/components/shared/SectionProvider'
 
 import '@/styles/tailwind.css'
+import { session } from '@/actions/actions'
 
 export const metadata: Metadata = {
   title: {
@@ -27,11 +28,12 @@ export default async function RootLayout({
     ]),
   )) as Array<[string, Array<Section>]>
   let allSections = Object.fromEntries(allSectionsEntries)
+  const currentSession = await session()
 
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
-        <Providers session={{ isAuth: false }}>
+        <Providers session={currentSession}>
           <div className="w-full">
             <Layout allSections={allSections}>{children}</Layout>
           </div>
