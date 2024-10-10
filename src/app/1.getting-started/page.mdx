@@ -1,0 +1,62 @@
+---
+title: Getting Started
+---
+
+import Example1 from '@/components/docs/getting-started/example1'
+
+# Welcome to MSBD5017
+
+This section will introduce you to the basics of our course and guide you through your first steps in MSBD5017.
+
+## Your First Smart Contract: Hello World
+
+Let's begin with a simple yet fundamental example in smart contract development - the "Hello World" program. This example will help you understand the basic structure of a smart contract.
+
+### What We're Building
+
+We'll create a smart contract named `HelloWorld` that has a single function `hello`. When called, this function will return a greeting message.
+
+### The Code
+
+Feel free to experiment with the code and see how your changes affect the output.
+
+> [!tip]
+> Here are a few tips to help you get started:
+>
+> 1. The code is automatically compiled as you type.
+> 2. If you want to manually compile, press `Cmd + Shift + S` (on Mac) or `Ctrl + Shift + S` (on Windows/Linux).
+> 3. Try changing the return message in the `hello` function and see how it updates the output!
+
+<Example1 />
+
+### Understanding the Code
+
+Let's break down what's happening in this smart contract:
+
+1. `contract HelloWorld`: This line declares a new smart contract named "HelloWorld".
+2. `function hello() public pure returns (string memory)`: This defines a function named "hello" that:
+   - Is `public`, meaning it can be called from outside the contract.
+   - Is `pure`, indicating it doesn't modify or read the contract's state.
+   - Returns a `string`.
+3. `return "Hello, World!";`: This is the actual greeting our function returns.
+
+## What's Remix IDE?
+
+![Remix IDE](/images/getting-started/remix.png)
+[Remix IDE](https://remix.ethereum.org) is a free, online tool for writing and testing smart contracts. It's great for beginners learning Solidity, the language of Ethereum smart contracts.
+
+## Our Approach
+
+In this course, we'll use a simple built-in code editor for challenges. Why?
+
+1. It's easy to use
+2. You can focus on learning, not tools
+3. Everything you need is right here on the page
+
+But don't worry - the skills you learn here will work in Remix too (and we will use Remix later in the course).
+
+## What's Next?
+
+As you grow, you might want to try more advanced tools like `hardhat`. We'll cover that later.
+
+For now, let's start coding!

@@ -1,0 +1,63 @@
+---
+title: Challenge 2 - Subaru's Vote
+description: Subaru's Vote
+---
+
+import Example from '@/components/docs/royal-selection/example'
+
+# Subaru's Royal Selection Voting Website
+
+In the heart of the city, **Subaru**, a cheerful young man, contemplates the upcoming **Royal Selection**. Concerned about the fairness of the process and the kingdom's future, he comes up with an innovative idea.
+
+## Subaru's Vision
+
+Subaru wants to create a special website allowing everyone to vote for the next ruler.
+Of course, his favorite candidate **Emilia** will have the most beautiful and eye-catching
+design among all candidates.
+
+> **(Is that fair? Well, that's a question for another day.)**
+
+## The Goal
+
+To help Subaru realize his vision, we need to create a simple smart contract that can:
+
+1. Display all candidates' information along with their vote counts.
+2. Allow everyone to vote for their favorite candidate.
+
+### Simplified Voting Process
+
+For the sake of simplicity, we'll allow people to vote multiple times, even though this isn't ideal for a real election.
+
+With this system, Subaru hopes to engage more citizens in the Royal Selection process and, perhaps, give his favorite candidate a little boost along the way.
+
+# Voting Contract Structure and Functions
+
+## Candidate Struct
+
+```solidity
+struct Candidate {
+    uint256 id;
+    uint256 votes;
+    string name;
+    string description;
+    string imageUrl;
+}
+```
+
+This struct is used to store information about each candidate in the election. It contains:
+
+- `name`: A string representing the candidate's name.
+- `description`: A string providing a brief description of the candidate.
+- `voteCount`: An unsigned integer tracking the number of votes received by the candidate.
+- `imageUrl`: A string representing the URL of an image associated with the candidate.
+- `id`: A unique identifier for the candidate.
+
+## Functions
+
+1. `castVote(uint256 candidateId)`: This function allows a user to cast a vote for their chosen candidate. The `candidateId` parameter represents the unique identifier of the candidate. Each address can only vote once.
+
+2. `getAllCandidates()`: This function retrieves information for all candidates participating in the election. It returns an array of `Candidate` structs, each containing the candidate's name, description, and current vote count. This allows users to view the complete list of candidates and their current standings in a single call.
+
+These elements provide the core structure and functionality for Subaru's voting system, allowing for efficient storage of candidate information and enabling users to participate in the election and view information for all candidates at once.
+
+<Example />
