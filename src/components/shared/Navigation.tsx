@@ -14,6 +14,7 @@ import { remToPx } from '@/lib/remToPx'
 
 // Assume navigation is imported from somewhere
 import { NavGroup, navigation } from '@/navigation'
+import ConnectWalletButton from './ConnectWalletButton'
 
 function useInitialValue<T>(value: T, condition = true) {
   let initialValue = useRef(value).current
@@ -228,9 +229,6 @@ export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
   return (
     <nav {...props}>
       <ul role="list">
-        <TopLevelNavItem href="/">API</TopLevelNavItem>
-        <TopLevelNavItem href="#">Documentation</TopLevelNavItem>
-        <TopLevelNavItem href="#">Support</TopLevelNavItem>
         {navigation.map((group, groupIndex) => (
           <NavigationGroup
             key={group.title}
@@ -239,9 +237,7 @@ export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
           />
         ))}
         <li className="sticky bottom-0 z-10 mt-6 min-[416px]:hidden">
-          <Button href="#" variant="filled" className="w-full">
-            Sign in
-          </Button>
+          {/* <ConnectWalletButton session={(props as any).session} /> */}
         </li>
       </ul>
     </nav>
