@@ -93,28 +93,32 @@ export default function Example1Executor() {
           }
           setHighlightedText('')
         } else {
-          // Find the first differing character
-          let diffIndex = 0
+          // Find the common prefix
+          let commonPrefixLength = 0
           while (
-            diffIndex < previousResult.length &&
-            diffIndex < result.length &&
-            previousResult[diffIndex] === result[diffIndex]
+            commonPrefixLength < previousResult.length &&
+            commonPrefixLength < result.length &&
+            previousResult[commonPrefixLength] === result[commonPrefixLength]
           ) {
-            diffIndex++
+            commonPrefixLength++
           }
 
-          // Erase the different part
-          for (let i = previousResult.length; i > diffIndex; i--) {
+          // Erase the different part from the end
+          for (let i = previousResult.length; i > commonPrefixLength; i--) {
             setDisplayText(previousResult.slice(0, i))
             await new Promise((resolve) => setTimeout(resolve, 50))
           }
 
           // Type the new part
-          for (let i = diffIndex; i <= result.length; i++) {
+          for (let i = commonPrefixLength; i <= result.length; i++) {
             setDisplayText(result.slice(0, i))
-            setHighlightedText(result.slice(diffIndex, i))
+            setHighlightedText(result.slice(commonPrefixLength, i))
             await new Promise((resolve) => setTimeout(resolve, 50))
           }
+
+          // Clear the highlight after a short delay
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          setHighlightedText('')
         }
       }
       animateText()
