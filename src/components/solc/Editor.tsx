@@ -74,7 +74,20 @@ export default function Editor({
       })
       .catch((error) => {
         setIsCompiling(false)
-        alert(error.message)
+        const sourceCode = editorRef.current!.getValue()
+        const start = { lineNumber: 1, columnNumber: 1 }
+        const end = offsetToLineColumn(sourceCode.length, sourceCode)
+        const model = editorRef.current!.getModel()
+        monacoRef.current!.editor.setModelMarkers(model!, 'compiler', [
+          {
+            startLineNumber: start.lineNumber,
+            startColumn: start.columnNumber,
+            endLineNumber: end.lineNumber,
+            endColumn: end.columnNumber,
+            message: 'Compiler error: ' + error.message,
+            severity: monacoRef.current!.MarkerSeverity.Error,
+          },
+        ])
         throw error
       })
       .finally(() => {
@@ -84,10 +97,10 @@ export default function Editor({
       })
 
     // set errors
-    const hasError = result.errors?.some((error) => error.severity === 'error')
-    const hasWarning = result.errors?.some(
-      (error) => error.severity === 'warning',
-    )
+    const hasError =
+      result.errors?.some((error) => error.severity === 'error') === true
+    const hasWarning =
+      result.errors?.some((error) => error.severity === 'warning') === true
 
     result.errors?.forEach((error) => {
       if (editorRef.current && monacoRef.current) {
