@@ -55,7 +55,9 @@ export default function UserProfile({
           transition={{ duration: 0.3 }}
           className="flex flex-col items-center gap-4"
         >
-          <WalletAvatarImage walletAddress={userWalletAddress} size={120} />
+          {userWalletAddress && (
+            <WalletAvatarImage walletAddress={userWalletAddress} size={120} />
+          )}
           <div className="text-center">
             <h3 className="text-xl font-semibold">
               {userName || 'Anonymous User'}
