@@ -9,6 +9,7 @@ import {
   WalletContextProvider,
 } from 'web3-connect-react'
 import { signOut } from '@/actions/actions'
+import { useRouter } from 'next/navigation'
 
 function ThemeWatcher() {
   let { resolvedTheme, setTheme } = useTheme()
@@ -41,6 +42,7 @@ export function Providers({
   children: React.ReactNode
   session: any
 }) {
+  const router = useRouter()
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange>
       <ThemeWatcher />
@@ -50,6 +52,7 @@ export function Providers({
           providers={[OKXProvider, MetaMaskProvider]}
           onSignedOut={async () => {
             await signOut()
+            router.refresh()
           }}
           listenToAccountChanges={false}
           listenToChainChanges={false}

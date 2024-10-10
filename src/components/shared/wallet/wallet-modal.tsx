@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 
 interface Props {
   closeModal: () => void
+  isSignedIn: boolean
 }
 
 /**
@@ -79,7 +80,7 @@ function WalletItem({
   }
 
   return (
-    <li
+    <div
       key={provider.metadata.name}
       className={'h-[80px] w-full'}
       style={{
@@ -119,16 +120,20 @@ function WalletItem({
           ) : null}
         </div>
       </button>
-    </li>
+    </div>
   )
 }
 
-export function ConnectWalletModal({ closeModal }: Props) {
-  const { sdk, isSignedIn, walletAddress, signOut } = useWallet()
+export function ConnectWalletModal({ closeModal, isSignedIn }: Props) {
+  const { sdk, walletAddress, signOut } = useWallet()
 
   return (
-    <div className={'flex flex-col items-center justify-center p-8'}>
-      <div className={'mx-auto w-full space-y-5'}>
+    <div className={'flex p-8'}>
+      <div
+        className={
+          'mx-auto flex w-full flex-col items-center justify-center space-y-5'
+        }
+      >
         <button
           className={'absolute right-10 top-10'}
           onClick={() => {
@@ -142,22 +147,22 @@ export function ConnectWalletModal({ closeModal }: Props) {
             <h1 className={'text-center text-2xl font-bold text-primary'}>
               Sign In To MSBD 5017 Website
             </h1>
-            <p className={'text-left text-sm font-normal'}>
+            <p className={'text-center text-sm font-normal'}>
               Click on the wallet provider you would like to use to sign in to
               the MSBD 5017 website
             </p>
-            <ul className={'mt-5 space-y-5'}>
+            <div className={'mt-5 w-full space-y-5'}>
               {sdk?.walletProviders
                 .filter((p) => p.isVisible(false))
                 .map((p) => {
                   return <WalletItem provider={p} closeModal={closeModal} />
                 })}
-            </ul>
+            </div>
           </>
         )}
 
         {isSignedIn && (
-          <div className="w-[300px]">
+          <div className="mx-auto">
             <h1 className={'text-2xl font-bold'}>My Account</h1>
             <div className={'flex flex-row items-center space-x-2 py-2'}>
               <div></div>
@@ -166,14 +171,19 @@ export function ConnectWalletModal({ closeModal }: Props) {
                 <span>{omitMiddle(walletAddress ?? '', 8)}</span>
               </div>
             </div>
-            <Button
-              onClick={signOut}
-              className={
-                'flex w-full flex-row justify-between rounded-lg disabled:cursor-not-allowed'
-              }
-            >
-              <span>Sign out</span>
-            </Button>
+            <div>
+              <Button
+                onClick={() => {
+                  signOut()
+                  closeModal()
+                }}
+                className={
+                  'flex w-96 flex-row justify-between rounded-lg disabled:cursor-not-allowed'
+                }
+              >
+                <span>Sign out</span>
+              </Button>
+            </div>
           </div>
         )}
       </div>

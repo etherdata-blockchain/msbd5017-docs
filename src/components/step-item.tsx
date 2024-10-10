@@ -27,7 +27,7 @@ export function StepItemComponent({
           {isDone ? (
             <Check className="h-5 w-5" />
           ) : (
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-400">
+            <span className="text-sm font-medium text-white dark:text-gray-400">
               {step + 1}
             </span>
           )}
@@ -39,7 +39,7 @@ export function StepItemComponent({
         )}
       </div>
       <div className="flex-1">
-        <div className="flex items-center rounded-2xl border p-5 pt-1.5">
+        <div className="flex items-center rounded-2xl border p-5">
           {children}
         </div>
       </div>

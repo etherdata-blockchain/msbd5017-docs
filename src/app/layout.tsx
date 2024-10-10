@@ -35,7 +35,9 @@ export default async function RootLayout({
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
         <Providers session={currentSession}>
           <div className="w-full">
-            <Layout allSections={allSections}>{children}</Layout>
+            <Layout allSections={allSections} session={currentSession}>
+              {children}
+            </Layout>
           </div>
         </Providers>
       </body>

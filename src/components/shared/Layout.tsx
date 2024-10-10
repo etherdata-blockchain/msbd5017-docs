@@ -16,9 +16,11 @@ import {
 export function Layout({
   children,
   allSections,
+  session,
 }: {
   children: React.ReactNode
   allSections: Record<string, Array<Section>>
+  session?: any
 }) {
   let pathname = usePathname()
 
@@ -40,7 +42,11 @@ export function Layout({
                 <span className="font-bold">MSBD5017</span>
               </Link>
             </div>
-            <Header />
+
+            <Header
+              // @ts-expect-error
+              session={session}
+            />
             <Navigation className="hidden lg:mt-10 lg:block" />
           </div>
         </motion.header>

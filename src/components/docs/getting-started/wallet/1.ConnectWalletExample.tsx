@@ -5,12 +5,13 @@ import ConnectWalletButton from '@/components/shared/ConnectWalletButton'
 import { StepItemComponent } from '@/components/step-item'
 import { useWallet } from 'web3-connect-react'
 
-export default function ConnectWalletExample() {
-  const { isSignedIn, walletAddress, signOut } = useWallet()
+export default function ConnectWalletExample({ session }: { session?: any }) {
+  const { walletAddress, signOut } = useWallet()
+  const isAuth = session === undefined ? false : session.isAuth
 
   return (
-    <StepItemComponent step={0} isDone={isSignedIn}>
-      {isSignedIn ? (
+    <StepItemComponent step={0} isDone={isAuth}>
+      {isAuth ? (
         <div className="flex h-full w-full flex-row items-center justify-between">
           <span>
             <span>You are connected to your wallet.</span>
@@ -21,7 +22,7 @@ export default function ConnectWalletExample() {
           </div>
         </div>
       ) : (
-        <ConnectWalletButton />
+        <ConnectWalletButton session={session} />
       )}
     </StepItemComponent>
   )

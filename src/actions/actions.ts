@@ -32,7 +32,12 @@ export async function compile(sourceCode: string): Promise<CompilerOutput> {
 export async function session() {
   const session = cookies().get(SessionKey)
 
-  return session?.value ? JSON.parse(session.value) : { isAuth: false }
+  return session?.value
+    ? {
+        ...JSON.parse(session.value),
+        isAuth: true,
+      }
+    : { isAuth: false }
 }
 
 export async function signOut() {

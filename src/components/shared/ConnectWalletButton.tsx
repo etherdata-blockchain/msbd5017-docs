@@ -7,13 +7,15 @@ import { ConnectWalletModal } from './wallet/wallet-modal'
 import { useWallet } from 'web3-connect-react'
 import { Wallet } from 'lucide-react'
 
-export default function ConnectWalletButton() {
+export default function ConnectWalletButton({ session }: { session: any }) {
   const [openModal, setOpenModal] = useState(false)
-  const { isLoading, isSignedIn, walletAddress, signOut } = useWallet()
+  const { isLoading } = useWallet()
+
+  const isAuth = session === undefined ? false : session.isAuth
 
   return (
     <div>
-      {isSignedIn ? (
+      {isAuth ? (
         <Button
           disabled={isLoading}
           onClick={() => {
@@ -36,9 +38,10 @@ export default function ConnectWalletButton() {
       <NativeModal
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
-        className="max-w-[800px] px-10"
+        className="w-full max-w-[800px]"
       >
         <ConnectWalletModal
+          isSignedIn={isAuth}
           closeModal={() => {
             setOpenModal(false)
           }}

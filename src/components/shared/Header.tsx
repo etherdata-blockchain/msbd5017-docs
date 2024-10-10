@@ -13,6 +13,7 @@ import { useMobileNavigationStore } from '@/components/shared/MobileNavigation'
 import { MobileSearch, Search } from '@/components/shared/Search'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import ConnectWalletButton from './ConnectWalletButton'
+import { session } from '@/actions/actions'
 
 function TopLevelNavItem({
   href,
@@ -36,7 +37,9 @@ function TopLevelNavItem({
 export const Header = forwardRef<
   React.ElementRef<'div'>,
   React.ComponentPropsWithoutRef<typeof motion.div>
->(function Header({ className, ...props }, ref) {
+  //@ts-expect-error
+>(function Header({ className, session, ...props }, ref) {
+  console.log('session', session)
   let { isOpen: mobileNavIsOpen } = useMobileNavigationStore()
   let isInsideMobileNavigation = useIsInsideMobileNavigation()
 
@@ -92,7 +95,7 @@ export const Header = forwardRef<
           <ThemeToggle />
         </div>
         <div className="hidden min-[416px]:contents">
-          <ConnectWalletButton />
+          <ConnectWalletButton session={session} />
         </div>
       </div>
     </motion.div>
