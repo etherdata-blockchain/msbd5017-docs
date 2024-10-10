@@ -12,7 +12,7 @@ export default function ConnectWalletExample({ session }: { session?: any }) {
   return (
     <StepItemComponent step={0} isDone={isAuth}>
       {isAuth ? (
-        <div className="flex h-full w-full flex-row items-center justify-between">
+        <div className="flex h-full w-full flex-row flex-wrap items-center justify-between">
           <span>
             <span>You are connected to your wallet.</span>
             <br /> <span className="font-bold">Wallet: {walletAddress}</span>
