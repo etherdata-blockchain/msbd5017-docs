@@ -13,9 +13,9 @@ import { useRouter } from 'next/navigation'
 
 function ThemeWatcher() {
   let { resolvedTheme, setTheme } = useTheme()
-
   useEffect(() => {
     let media = window.matchMedia('(prefers-color-scheme: dark)')
+    if (!resolvedTheme) return
 
     function onMediaChange() {
       let systemTheme = media.matches ? 'dark' : 'light'

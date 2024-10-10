@@ -39,7 +39,6 @@ export const Header = forwardRef<
   React.ComponentPropsWithoutRef<typeof motion.div>
   //@ts-expect-error
 >(function Header({ className, session, ...props }, ref) {
-  console.log('session', session)
   let { isOpen: mobileNavIsOpen } = useMobileNavigationStore()
   let isInsideMobileNavigation = useIsInsideMobileNavigation()
 

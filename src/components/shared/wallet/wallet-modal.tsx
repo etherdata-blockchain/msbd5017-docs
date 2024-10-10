@@ -7,6 +7,8 @@ import {
   WalletProvider,
 } from 'web3-connect-react'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import UserProfile from '@/hooks/user-profile'
 
 interface Props {
   closeModal: () => void
@@ -37,6 +39,7 @@ function WalletItem({
 
   const { sdk, signIn } = useWallet()
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const onSignIn = useCallback(
     async (provider: AvailableProvider) => {
@@ -47,6 +50,7 @@ function WalletItem({
           if (error) {
             throw new Error(error)
           }
+          router.refresh()
         },
         getSignInData: async (address, provider) => {
           const message = 'Sign In to MSBD 5017 website'
@@ -125,7 +129,7 @@ function WalletItem({
 }
 
 export function ConnectWalletModal({ closeModal, isSignedIn }: Props) {
-  const { sdk, walletAddress, signOut } = useWallet()
+  const { sdk, walletAddress, signOut, balance } = useWallet()
 
   return (
     <div className={'flex p-8'}>
@@ -162,29 +166,14 @@ export function ConnectWalletModal({ closeModal, isSignedIn }: Props) {
         )}
 
         {isSignedIn && (
-          <div className="mx-auto">
-            <h1 className={'text-2xl font-bold'}>My Account</h1>
-            <div className={'flex flex-row items-center space-x-2 py-2'}>
-              <div></div>
-              <div className={'flex flex-col'}>
-                <span className={''}>Address</span>
-                <span>{omitMiddle(walletAddress ?? '', 8)}</span>
-              </div>
-            </div>
-            <div>
-              <Button
-                onClick={() => {
-                  signOut()
-                  closeModal()
-                }}
-                className={
-                  'flex w-96 flex-row justify-between rounded-lg disabled:cursor-not-allowed'
-                }
-              >
-                <span>Sign out</span>
-              </Button>
-            </div>
-          </div>
+          <UserProfile
+            userWalletAddress={walletAddress}
+            userWalletBalance={balance}
+            onSignOut={function (): void {
+              signOut()
+              closeModal()
+            }}
+          />
         )}
       </div>
     </div>

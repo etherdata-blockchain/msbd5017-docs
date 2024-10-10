@@ -38,7 +38,6 @@ export const checker: Checker = async (output: CompilerOutput) => {
   }
 
   // check if fillBottle takes no arguments
-  console.log(output.contracts['contract.sol']['FillBottleGame'].abi)
   if (
     output.contracts['contract.sol']['FillBottleGame'].abi.find(
       (item) => item.name === 'fillBottle' && item.inputs.length !== 0,
