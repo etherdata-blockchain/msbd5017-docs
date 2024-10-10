@@ -16,6 +16,7 @@ import { useSolidity } from '@/context/solidityContext'
 import {
   buildTransaction,
   common,
+  decodeRevertMessage,
   deployContract,
   encodeFunction,
   getAccountNonce,
@@ -81,7 +82,8 @@ async function getAllCandidates(
   })
 
   if (result.execResult.exceptionError) {
-    throw result.execResult.exceptionError
+    const message = decodeRevertMessage(result.execResult.returnValue)
+    throw new Error(message)
   }
 
   const resultData = AbiCoder.decode(
@@ -120,7 +122,8 @@ async function castVote(
 
   const result = await vm.runTx({ tx })
   if (result.execResult.exceptionError) {
-    throw result.execResult.exceptionError
+    const message = decodeRevertMessage(result.execResult.returnValue)
+    throw new Error(message)
   }
 }
 
@@ -198,7 +201,12 @@ export function EnhancedCandidateDisplay() {
         )
 
         // update candidates
-        const candidates = await getAllCandidates(vm, contractAddress)
+        const candidates = await getAllCandidates(vm, contractAddress).catch(
+          (e: any) => {
+            alert(e.message)
+            throw e
+          },
+        )
         setCandidates(candidates)
       } catch (e: any) {
         alert(`Cannot vote: ${e.error}`)

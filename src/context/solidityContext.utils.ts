@@ -64,14 +64,14 @@ export const buildTransaction = (
 
 /**
  *  Insert an account into the VM
- *  With a balance of 20 ETH
+ *  With a balance of 2000 ETH
  * @param vm
  * @param address
  */
 export const insertAccount = async (vm: VM, address: Address) => {
   const acctData = {
     nonce: 0,
-    balance: BigInt(20) ** BigInt(18), // 20 ETH
+    balance: BigInt(2000) ** BigInt(18), // 2000 ETH
   }
   const account = Account.fromAccountData(acctData)
 
@@ -140,3 +140,34 @@ export const block = Block.fromBlockData(
   { header: { extraData: new Uint8Array(97) } },
   { common },
 )
+
+import { defaultAbiCoder } from '@ethersproject/abi'
+
+export function decodeRevertMessage(returnValue: Uint8Array): string {
+  if (returnValue.length === 0) {
+    return 'Transaction reverted without a reason'
+  }
+
+  // Convert Uint8Array to hex string
+  const hexString =
+    '0x' +
+    Array.from(returnValue)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+
+  // Check if it's a standard revert message (Error(string))
+  if (hexString.slice(2, 10) === '08c379a0') {
+    // Remove the function selector
+    const encodedReason = '0x' + hexString.slice(10)
+    const [decodedReason] = defaultAbiCoder.decode(['string'], encodedReason)
+    return `Transaction reverted with reason: ${decodedReason}`
+  }
+
+  // It might be a custom error, try to decode it as a string
+  try {
+    const [decodedReason] = defaultAbiCoder.decode(['string'], hexString)
+    return `Transaction reverted with custom error: ${decodedReason}`
+  } catch (decodeError) {
+    return `Failed to decode revert reason. Raw data: ${hexString}`
+  }
+}

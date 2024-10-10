@@ -11,6 +11,8 @@ const SolidityContextProvider = dynamic(
   { ssr: false },
 )
 
+const DepositUi = dynamic(() => import('./deposit-ui'), { ssr: false })
+
 const Editor = dynamic(() => import('@/components/solc/Editor'), { ssr: false })
 
 export default function FillBottleExample() {
@@ -20,7 +22,9 @@ export default function FillBottleExample() {
         <div className="col-span-2">
           <Editor sourceCode={solution} height="900px" checker={checker} />
         </div>
-        <div className="col-span-1"></div>
+        <div className="col-span-1">
+          <DepositUi />
+        </div>
       </div>
     </SolidityContextProvider>
   )
