@@ -67,6 +67,9 @@ export default function Editor({
     setSuccess(false)
     const result = await compile(sourceCode)
       .then((result) => {
+        if ('error' in result) {
+          throw new Error(result.error)
+        }
         return result
       })
       .catch((error) => {
