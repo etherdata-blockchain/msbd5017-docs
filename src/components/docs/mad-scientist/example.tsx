@@ -20,7 +20,7 @@ export default function FillBottleExample() {
     <SolidityContextProvider>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="col-span-2">
-          <Editor sourceCode={solution} height="900px" checker={checker} />
+          <Editor sourceCode={source} height="900px" checker={checker} />
         </div>
         <div className="col-span-1">
           <DepositUi />
