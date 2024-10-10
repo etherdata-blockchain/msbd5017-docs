@@ -12,9 +12,9 @@ export default function ConnectToTargetNetwork({ session }: { session?: any }) {
   }
 
   return (
-    <StepItemComponent step={1} isDone={chainId === axiomGemeni.chainId} isLast>
+    <StepItemComponent step={1} isDone={chainId === axiomGemeni.chainId}>
       {chainId && (
-        <div className="flex w-full flex-row items-center justify-between">
+        <div className="flex w-full flex-row flex-wrap items-center justify-between">
           {chainId === axiomGemeni.chainId ? (
             <div>
               <span className="font-medium">
