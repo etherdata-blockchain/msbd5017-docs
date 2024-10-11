@@ -8,7 +8,10 @@ import { editor } from 'monaco-editor'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../shared/Button'
 import dynamic from 'next/dynamic'
-import { addSolidityIntellisense } from './editor.utils'
+import {
+  addSolidityABIIntellisense,
+  addSolidityIntellisense,
+} from './editor.utils'
 import { Monaco } from '@monaco-editor/react'
 import { useTheme } from 'next-themes'
 
@@ -68,6 +71,10 @@ export default function Editor({
     const result = await compile(sourceCode)
       .then((result) => {
         if ('error' in result) {
+          if (!result.error) {
+            throw new Error('Unknown error')
+          }
+          console.error(result.error)
           throw new Error(result.error)
         }
         return result
@@ -96,7 +103,7 @@ export default function Editor({
         }, compilationDelay)
       })
 
-    // set errors
+    // does compiler return any errors
     const hasError =
       result.errors?.some((error) => error.severity === 'error') === true
     const hasWarning =
@@ -137,6 +144,12 @@ export default function Editor({
         }
       }
     })
+
+    // add intellisense using the abi
+    if (result.abis) {
+      // merge all abis into one single abi array
+      addSolidityABIIntellisense(monacoRef.current!, result.abis!)
+    }
 
     // if compiler does not return any errors, run the checker
     if (checker && !hasError) {

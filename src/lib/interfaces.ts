@@ -11,6 +11,7 @@ export interface CompilerOutput {
     }
     type: string
   }[]
+  abis?: any[]
   contracts: {
     [fileName: string]: {
       [contractName: string]: {

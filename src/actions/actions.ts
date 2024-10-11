@@ -45,7 +45,41 @@ export async function compile(
         }
       },
     })
-    return JSON.parse(output)
+    const result = JSON.parse(output)
+    const contracts = result.contracts as
+      | {
+          [fileName: string]: {
+            [contractName: string]: {
+              abi: any[]
+              evm: {
+                bytecode: {
+                  object: string
+                }
+              }
+            }
+          }
+        }
+      | undefined
+
+    if (contracts === undefined) {
+      return {
+        ...result,
+      }
+    }
+    const allabis = Object.entries(contracts).flatMap(
+      ([fileName, fileContracts]) =>
+        Object.entries(fileContracts).flatMap(([contractName, contractData]) =>
+          contractData.abi.map((abiItem) => ({
+            ...abiItem,
+            contractName,
+            fileName,
+          })),
+        ),
+    )
+    return {
+      ...result,
+      abis: allabis,
+    }
   } catch (error: any) {
     console.error(error)
     return {

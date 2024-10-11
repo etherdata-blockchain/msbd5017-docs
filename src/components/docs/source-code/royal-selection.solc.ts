@@ -12,7 +12,7 @@ contract RoyalSelection {
         string imageUrl;
     }
 
-    Candidate[] public candidates;
+    Candidate[] private candidates;
     // end time of the election
     uint256 public endTime;
 
@@ -158,16 +158,6 @@ export const checker: Checker = async (output: CompilerOutput) => {
       true,
       'Public endTime state variable not found or incorrectly defined',
     ]
-  }
-
-  // Check if the candidates array exists
-  const candidates = abi.find((item) => item.name === 'candidates')
-  if (
-    !candidates ||
-    candidates.type !== 'function' ||
-    candidates.stateMutability !== 'view'
-  ) {
-    return [true, 'Public candidates array not found or incorrectly defined']
   }
 
   // If all checks pass, return success

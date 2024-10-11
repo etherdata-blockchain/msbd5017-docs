@@ -1,9 +1,10 @@
 import { Monaco } from '@monaco-editor/react'
+import { IDisposable, languages } from 'monaco-editor'
 
 let hasBeenInitialized = false
 export function addSolidityIntellisense(monaco: Monaco) {
   if (hasBeenInitialized) return
-  monaco.languages.register({ id: 'solidity' })
+  monaco.languages.register({ id: 'sol' })
   // delete previous language configuration
 
   // Define Solidity keywords
@@ -210,4 +211,156 @@ export function addSolidityIntellisense(monaco: Monaco) {
   })
 
   hasBeenInitialized = true
+}
+
+let disposables: IDisposable[] = []
+
+/**
+ * Add Solidity ABI intellisense to the Monaco editor
+ * @param monaco Monaco instance
+ * @param abi  ABI of the contract
+ */
+export function addSolidityABIIntellisense(monaco: Monaco, abi: any[]) {
+  // Clear previous settings
+  console.log('clearing previous settings')
+  console.log(disposables.length)
+  disposables.forEach((d) => d.dispose())
+  disposables = []
+
+  // Register language if not already registered
+  monaco.languages.register({ id: 'sol' })
+
+  // Define ABI-based suggestions
+  console.log(abi)
+  const abiSuggestions = abi.map((item) => {
+    let suggestion: languages.CompletionItem = {
+      label: item.name,
+      kind: getCompletionItemKind(item.type),
+      insertText: item.name,
+      detail: `${item.type} ${item.name}`,
+      documentation: {
+        value: createDocumentation(item),
+      },
+      range: {
+        startLineNumber: 0,
+        endLineNumber: 0,
+        startColumn: 0,
+        endColumn: 0,
+      },
+    }
+
+    if (item.type === 'function') {
+      const params =
+        item.inputs
+          ?.map((input: any) => `${input.type} ${input.name}`)
+          .join(', ') || ''
+      suggestion.insertText = `${item.name}(${params})`
+      suggestion.insertTextRules =
+        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+    }
+
+    return suggestion
+  })
+
+  // Configure auto-completion
+  console.log('registering completion provider')
+  const completionProvider = monaco.languages.registerCompletionItemProvider(
+    'sol',
+    {
+      provideCompletionItems: (model, position) => {
+        const wordInfo = model.getWordUntilPosition(position)
+        const word = wordInfo.word.toLowerCase()
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: wordInfo.startColumn,
+          endColumn: wordInfo.endColumn,
+        }
+
+        const matchingSuggestions = abiSuggestions.filter(
+          (suggestion: languages.CompletionItem) => {
+            if (typeof suggestion.label === 'string') {
+              return suggestion.label.toLowerCase().includes(word)
+            }
+
+            if (suggestion.label === undefined) {
+              return false
+            }
+
+            if ('label' in suggestion.label) {
+              return suggestion.label.label.toLowerCase().includes(word)
+            }
+          },
+        )
+
+        return {
+          suggestions: matchingSuggestions.map((suggestion) => ({
+            ...suggestion,
+            range: range,
+          })),
+        }
+      },
+    },
+  )
+
+  disposables.push(completionProvider)
+
+  // Add hover provider
+  console.log('registering hover provider')
+  const hoverProvider = monaco.languages.registerHoverProvider('sol', {
+    provideHover: (model, position) => {
+      const word = model.getWordAtPosition(position)
+      if (!word) return null
+      const matchingItem = abi.find((item) => item.name === word.word)
+      if (!matchingItem) return null
+
+      const content = ` \` ${matchingItem.type} ${matchingItem.name} \`
+      ${matchingItem.contractName ? `\n*Contract:* ${matchingItem.contractName}` : ''}
+      ${matchingItem.fileName ? `\n*File:* ${matchingItem.fileName}` : ''}
+      ${matchingItem.inputs && matchingItem.inputs.length > 0 ? `\n${formatParams(matchingItem.inputs)}` : ''}
+      ${matchingItem.outputs && matchingItem.outputs.length > 0 ? `\n*@returns* ${formatParams(matchingItem.outputs)}` : ''}
+      ${matchingItem.stateMutability ? `\n*@${matchingItem.stateMutability}*` : ''}
+      ${matchingItem.payable !== undefined ? `\n*@payable* ${matchingItem.payable}` : ''}`.trim()
+      return {
+        contents: [
+          {
+            value: content,
+          },
+        ],
+      }
+    },
+  })
+
+  disposables.push(hoverProvider)
+}
+
+const formatParams = (params: any[] | undefined) => {
+  if (!params || params.length === 0) return 'None'
+  return params
+    .map((param) => `*@param* \`${param.name}\` — ${param.type}`)
+    .join('\n')
+}
+
+const createDocumentation = (item: any) =>
+  `${item.contractName ? `\n*Contract:* ${item.contractName}` : ''}
+${item.fileName ? `\n*File:* ${item.fileName}` : ''}
+${item.inputs && item.inputs.length > 0 ? `\n${formatParams(item.inputs)}` : ''}
+${item.outputs && item.outputs.length > 0 ? `\n*@returns* ${formatParams(item.outputs)}` : ''}
+${item.stateMutability ? `\n*@${item.stateMutability}*` : ''}
+${item.payable !== undefined ? `\n*@payable* ${item.payable}` : ''}`.trim()
+
+function getCompletionItemKind(abiType: string): languages.CompletionItemKind {
+  switch (abiType.toLowerCase()) {
+    case 'function':
+      return languages.CompletionItemKind.Function
+    case 'event':
+      return languages.CompletionItemKind.Event
+    case 'constructor':
+      return languages.CompletionItemKind.Constructor
+    case 'fallback':
+    case 'receive':
+      return languages.CompletionItemKind.Method
+    default:
+      return languages.CompletionItemKind.Property
+  }
 }
