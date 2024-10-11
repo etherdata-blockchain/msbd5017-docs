@@ -247,10 +247,11 @@ export default function Editor({
           }
         }}
         onMount={(editor, monaco) => {
-          editorRef.current = editor
-          monacoRef.current = monaco
-
-          addSolidityIntellisense(monaco)
+          if (!editorRef.current) {
+            editorRef.current = editor
+            monacoRef.current = monaco
+            addSolidityIntellisense(monaco)
+          }
         }}
         options={{
           minimap: { enabled: false },

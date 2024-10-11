@@ -200,5 +200,112 @@ contract Lock is Ownable {
 `
 
 export const checker: Checker = async (output) => {
+  // Check if both contracts exist
+  if (output.contracts['contract.sol']['FGT'] === undefined) {
+    return [true, 'FGT contract does not exist']
+  }
+  if (output.contracts['contract.sol']['Lock'] === undefined) {
+    return [true, 'Lock contract does not exist']
+  }
+
+  const fgtAbi = output.contracts['contract.sol']['FGT'].abi
+  const lockAbi = output.contracts['contract.sol']['Lock'].abi
+
+  // Check FGT contract
+  const fgtChecks = [
+    checkFunction(fgtAbi, 'setLockContract', ['address'], 'nonpayable'),
+    checkFunction(fgtAbi, 'mint', ['address', 'uint256'], 'nonpayable', [
+      'bool',
+    ]),
+    checkFunction(fgtAbi, 'redeem', ['uint256'], 'nonpayable'),
+    checkFunction(fgtAbi, 'transfer', ['address', 'uint256'], 'nonpayable', [
+      'bool',
+    ]),
+    checkFunction(
+      fgtAbi,
+      'transferFrom',
+      ['address', 'address', 'uint256'],
+      'nonpayable',
+      ['bool'],
+    ),
+    checkVariable(fgtAbi, 'lockContract', 'address'),
+    checkVariable(fgtAbi, 'REDEMPTION_DATE', 'uint256'),
+  ]
+
+  for (const check of fgtChecks) {
+    if (check[0]) return check
+  }
+
+  // Check Lock contract
+  const lockChecks = [
+    checkFunction(lockAbi, 'lockAXC', [], 'payable'),
+    checkFunction(lockAbi, 'withdrawAXC', ['uint256'], 'nonpayable'),
+    checkVariable(lockAbi, 'DEPOSIT_COST', 'uint256'),
+    checkVariable(lockAbi, 'DEPOSIT_LIMIT', 'uint256'),
+    checkVariable(lockAbi, 'totalDeposits', 'uint256'),
+    checkVariable(lockAbi, 'fgtToken', 'address'),
+  ]
+
+  for (const check of lockChecks) {
+    if (check[0]) return check
+  }
+
+  // If all checks pass
+  return [false, '']
+}
+
+function checkFunction(
+  abi: any[],
+  name: string,
+  inputs: string[],
+  stateMutability: string,
+  outputs: string[] = [],
+): [boolean, string] {
+  const func = abi.find(
+    (item) => item.type === 'function' && item.name === name,
+  )
+  if (!func) {
+    return [true, `Function ${name} not found`]
+  }
+  if (
+    func.inputs.length !== inputs.length ||
+    !func.inputs.every(
+      (input: any, index: number) => input.type === inputs[index],
+    )
+  ) {
+    return [true, `Function ${name} has incorrect inputs`]
+  }
+  if (func.stateMutability !== stateMutability) {
+    return [true, `Function ${name} has incorrect state mutability`]
+  }
+  if (
+    outputs.length > 0 &&
+    (func.outputs.length !== outputs.length ||
+      !func.outputs.every(
+        (output: any, index: number) => output.type === outputs[index],
+      ))
+  ) {
+    return [true, `Function ${name} has incorrect outputs`]
+  }
+  return [false, '']
+}
+
+function checkVariable(
+  abi: any[],
+  name: string,
+  type: string,
+): [boolean, string] {
+  const variable = abi.find(
+    (item) =>
+      item.type === 'function' &&
+      item.name === name &&
+      item.stateMutability === 'view',
+  )
+  if (!variable) {
+    return [true, `Public variable ${name} not found`]
+  }
+  if (variable.outputs.length !== 1 || variable.outputs[0].type !== type) {
+    return [true, `Public variable ${name} has incorrect type`]
+  }
   return [false, '']
 }

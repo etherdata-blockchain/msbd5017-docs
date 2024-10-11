@@ -2,6 +2,7 @@ import { Monaco } from '@monaco-editor/react'
 
 export function addSolidityIntellisense(monaco: Monaco) {
   monaco.languages.register({ id: 'solidity' })
+  // delete previous language configuration
 
   // Define Solidity keywords
   const solidityKeywords = [
@@ -88,9 +89,7 @@ export function addSolidityIntellisense(monaco: Monaco) {
   monaco.languages.setMonarchTokensProvider('sol', {
     defaultToken: '',
     tokenPostfix: '.sol',
-
     keywords: solidityKeywords,
-
     operators: [
       '=',
       '>',
