@@ -1,0 +1,203 @@
+---
+title: Solidity Basics - Types and Grammar
+description: Learn about basic types and grammar in Solidity, a high-level programming language used for implementing smart contracts on various blockchain platforms.
+---
+
+export const metadata = {
+  title: 'Solidity Basics: Types and Grammar',
+  description:
+    'Learn about basic types and grammar in Solidity, a high-level programming language used for implementing smart contracts on various blockchain platforms.',
+}
+
+# Solidity Basics: Types and Grammar
+
+## Introduction
+
+Solidity is a high-level programming language used for implementing smart contracts on various blockchain platforms, primarily Ethereum. This guide covers basic types and grammar in Solidity.
+
+## Data Types
+
+### Value Types
+
+#### Integers
+
+- `int`: Signed integer
+- `uint`: Unsigned integer
+- Variations: `int8` to `int256`, `uint8` to `uint256`
+
+Example:
+
+```solidity
+uint8 smallNumber = 255;
+int256 bigNumber = -1000000;
+```
+
+#### Boolean
+
+- `bool`: true or false
+
+Example:
+
+```solidity
+bool isActive = true;
+```
+
+#### Address
+
+- `address`: Holds a 20-byte Ethereum address
+
+Example:
+
+```solidity
+address wallet = 0x123...;
+```
+
+#### Bytes and Strings
+
+- `bytes`: Dynamic array of bytes
+- `string`: UTF-8 encoded string
+
+Example:
+
+```solidity
+bytes memory data = new bytes(10);
+string memory name = "Solidity";
+```
+
+### Reference Types
+
+#### Arrays
+
+- Fixed-size or dynamic
+- Declared as `Type[]`
+
+Example:
+
+```solidity
+uint[] numbers;
+uint[5] fixedNumbers;
+```
+
+#### Structs
+
+- Custom defined types
+
+Example:
+
+```solidity
+struct Person {
+    string name;
+    uint age;
+}
+```
+
+#### Mappings
+
+- Key-value pairs
+
+Example:
+
+```solidity
+mapping(address => uint) balances;
+```
+
+## Variables
+
+### State Variables
+
+Stored permanently in contract storage.
+
+```solidity
+contract MyContract {
+    uint public myStateVariable = 0;
+}
+```
+
+### Local Variables
+
+Temporary variables in functions.
+
+```solidity
+function myFunction() public {
+    uint localVar = 5;
+}
+```
+
+## Functions
+
+Basic syntax:
+
+```solidity
+function functionName(parameter1Type parameter1Name, parameter2Type parameter2Name) visibility returns (returnType) {
+    // Function body
+}
+```
+
+Example:
+
+```solidity
+function add(uint a, uint b) public pure returns (uint) {
+    return a + b;
+}
+```
+
+- Pure: Function does not read or modify state.
+- Payable: Function can receive Ether.
+- View: Function does not modify state.
+
+## Control Structures
+
+### If-Else
+
+```solidity
+if (condition) {
+    // code
+} else if (anotherCondition) {
+    // code
+} else {
+    // code
+}
+```
+
+### Loops
+
+```solidity
+for (uint i = 0; i < 10; i++) {
+    // code
+}
+
+while (condition) {
+    // code
+}
+```
+
+## Error Handling
+
+```solidity
+require(condition, "Error message");
+assert(condition);
+revert("Error message");
+```
+
+## Events
+
+Used to emit logs on the blockchain.
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value);
+
+function transfer(address to, uint256 value) public {
+    // ... transfer logic ...
+    emit Transfer(msg.sender, to, value);
+}
+```
+
+Why use events?
+
+Events in Solidity serve several important purposes:
+
+- Logging: Events provide a way to log important occurrences within a smart contract. This logging happens on the blockchain, making it immutable and verifiable.
+- Cost-effective storage: Storing data in events is much cheaper than storing it in contract state variables. Events are not accessible from within smart contracts, but they can be efficiently queried from outside the blockchain.
+- Notifications: Dapps (Decentralized Applications) can listen for specific events and trigger actions when they occur. This enables real-time updates and interactions with the frontend.
+- Debugging and auditing: Events make it easier to track the execution of smart contracts, which is crucial for debugging and auditing purposes.
+- Indexing: Events can include indexed parameters, which allow for efficient filtering and searching of event logs. (For example, EtherScan allows users to search for specific events based on indexed parameters. Or you can build your own tools to analyze event logs.)
