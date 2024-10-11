@@ -12,7 +12,7 @@ contract RoyalSelection {
         string imageUrl;
     }
 
-    Candidate[] public candidates;
+    Candidate[] private candidates;
     // end time of the election
     uint256 public endTime;
 
@@ -99,9 +99,66 @@ contract RoyalSelection {
         }
     }
 }
-
 `
 
 export const checker: Checker = async (output: CompilerOutput) => {
+  // Check if the contract RoyalSelection exists
+  if (output.contracts['contract.sol']['RoyalSelection'] === undefined) {
+    return [true, 'RoyalSelection contract does not exist']
+  }
+
+  const abi = output.contracts['contract.sol']['RoyalSelection'].abi
+
+  // Check if the constructor exists and has correct parameters
+  const constructor = abi.find((item) => item.type === 'constructor')
+  if (!constructor) {
+    return [true, 'Constructor not found']
+  }
+  if (
+    constructor.inputs.length !== 2 ||
+    constructor.inputs[0].type !== 'tuple[]' ||
+    constructor.inputs[1].type !== 'uint256'
+  ) {
+    return [
+      true,
+      'Constructor should take Candidate[] and uint256 as parameters',
+    ]
+  }
+
+  // Check if the getAllCandidates function exists
+  const getAllCandidates = abi.find((item) => item.name === 'getAllCandidates')
+  if (!getAllCandidates) {
+    return [true, 'Function getAllCandidates not found']
+  }
+  if (
+    getAllCandidates.outputs.length !== 1 ||
+    getAllCandidates.outputs[0].type !== 'tuple[]'
+  ) {
+    return [true, 'Function getAllCandidates should return Candidate[]']
+  }
+
+  // Check if the castVote function exists
+  const castVote = abi.find((item) => item.name === 'castVote')
+  if (!castVote) {
+    return [true, 'Function castVote not found']
+  }
+  if (castVote.inputs.length !== 1 || castVote.inputs[0].type !== 'uint256') {
+    return [true, 'Function castVote should take a uint256 parameter']
+  }
+
+  // Check if the endTime state variable exists
+  const endTime = abi.find((item) => item.name === 'endTime')
+  if (
+    !endTime ||
+    endTime.type !== 'function' ||
+    endTime.stateMutability !== 'view'
+  ) {
+    return [
+      true,
+      'Public endTime state variable not found or incorrectly defined',
+    ]
+  }
+
+  // If all checks pass, return success
   return [false, '']
 }

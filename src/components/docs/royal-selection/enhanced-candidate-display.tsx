@@ -132,10 +132,14 @@ export function EnhancedCandidateDisplay() {
   const [candidates, setCandidates] = useState<Candidate[]>([])
   const [contractAddress, setContractAddress] = useState<Address | null>(null)
 
-  const totalVotes = useMemo(
-    () => candidates.reduce((acc, c) => acc + c.votes, BigInt(0)),
-    [candidates],
-  )
+  const totalVotes = useMemo(() => {
+    let totalVotes = 0
+    console.log(typeof totalVotes)
+    for (let i = 0; i < candidates.length; i++) {
+      totalVotes += Number(candidates[i].votes)
+    }
+    return totalVotes
+  }, [candidates])
 
   useEffect(() => {
     if (!vm) return
@@ -209,7 +213,7 @@ export function EnhancedCandidateDisplay() {
         )
         setCandidates(candidates)
       } catch (e: any) {
-        alert(`Cannot vote: ${e.error}`)
+        alert(e.message)
       }
     },
     [vm, account, contractAddress],
@@ -265,15 +269,13 @@ export function EnhancedCandidateDisplay() {
                 {index === 0 && (
                   <>
                     <Progress
-                      value={Number(candidate.votes / totalVotes) * 100}
+                      value={(Number(candidate.votes) / totalVotes) * 100}
                       className="h-2"
                     />
                     <p className="text-right text-xs text-muted-foreground">
-                      {totalVotes == BigInt(0)
-                        ? '0'
-                        : (Number(candidate.votes / totalVotes) * 100).toFixed(
-                            1,
-                          )}
+                      {((Number(candidate.votes) / totalVotes) * 100).toFixed(
+                        2,
+                      )}
                       % of total votes
                     </p>
                   </>
