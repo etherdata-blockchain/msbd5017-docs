@@ -99,7 +99,6 @@ contract RoyalSelection {
         }
     }
 }
-
 `
 
 export const checker: Checker = async (output: CompilerOutput) => {

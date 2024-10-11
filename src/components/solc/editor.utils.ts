@@ -231,7 +231,6 @@ export function addSolidityABIIntellisense(monaco: Monaco, abi: any[]) {
   monaco.languages.register({ id: 'sol' })
 
   // Define ABI-based suggestions
-  console.log(abi)
   const abiSuggestions = abi.map((item) => {
     let suggestion: languages.CompletionItem = {
       label: item.name,
