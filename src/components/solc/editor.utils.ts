@@ -1,6 +1,8 @@
 import { Monaco } from '@monaco-editor/react'
 
+let hasBeenInitialized = false
 export function addSolidityIntellisense(monaco: Monaco) {
+  if (hasBeenInitialized) return
   monaco.languages.register({ id: 'solidity' })
   // delete previous language configuration
 
@@ -206,4 +208,6 @@ export function addSolidityIntellisense(monaco: Monaco) {
       }
     },
   })
+
+  hasBeenInitialized = true
 }
