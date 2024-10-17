@@ -1,11 +1,10 @@
 'use client'
 
 import { CompilerOutput } from '@/lib/interfaces'
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { Address, hexToBytes } from '@ethereumjs/util'
 import { VM } from '@ethereumjs/vm'
-import { Chain, Common, Hardfork } from '@ethereumjs/common'
-import { Account, Address, hexToBytes } from '@ethereumjs/util'
 import { ethers } from 'ethers'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { common, insertAccount } from './solidityContext.utils'
 
 interface SolidityContextInterface {
