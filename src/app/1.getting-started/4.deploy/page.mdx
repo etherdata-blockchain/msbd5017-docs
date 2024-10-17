@@ -1,0 +1,61 @@
+---
+title: Deploy Your First Smart Contract
+description: Deploy your first smart contract on the Axiomesh blockchain.
+---
+
+export const metadata = {
+  title: 'Deploy Your First Smart Contract',
+  description: 'Deploy your first smart contract on the Axiomesh blockchain.',
+}
+
+import CheckList from '@/components/docs/getting-started/wallet/Example'
+import Example from '@/components/docs/getting-started/compiled-and-deploy/example'
+import Example2 from '@/components/docs/getting-started/compiled-and-deploy/example2'
+import { Card } from '@/components/ui/Card'
+import SolidityContextProvider from '@/context/layzySolidityContext'
+
+<SolidityContextProvider>
+
+## Deploy Your First Smart Contract
+
+In this guide, you'll deploy your first smart contract on the `Axiomesh` blockchain. Before you begin, ensure you've completed the following checklist:
+
+<Card className="p-5 !shadow-none">
+  <b>Checklist:</b>
+  <CheckList />
+</Card>
+
+## Step 1: Compile and deploy your smart contract in the editor below
+
+Write your smart contract in the editor below and compile it. We’ve provided a simple contract to help you get started. Make sure that your contract includes a `mint` function for the UI to work correctly.
+
+> [!note]
+> If you make changes to the contract, you’ll need to delete and redeploy it for the UI to reflect those updates.
+
+<Example />
+
+Once the contract is compiled, the output will be displayed below.
+
+> [!tip]
+> Solidity encodes metadata into the bytecode, which helps the EVM understand the contract's interface and ABI. You can use this [website](https://playground.sourcify.dev/) to decode the metadata.
+
+<Example2 />
+
+</SolidityContextProvider>
+
+## Step 2: Deploy your contract using Remix
+
+First, open remix IDE by visiting [remix.ethereum.org](https://remix.ethereum.org/) and copy the above code into the editor.
+After pasting the code, you can click compile to compile the contract.
+
+![Remix IDE](/images/getting-started/1.remix-tutorial.png)
+
+Next, click on the `Deploy & Run Transactions` tab and select the environment as `Injected provider - MetaMask`. After selecting the environment, you can click on the `Deploy` button to deploy the contract.
+
+![Deploy & Run Transactions](/images/getting-started/2.remix-deploy.png)
+
+After deploying the contract, you can copy the contract address and ABI from the `Deployed Contracts` section.
+
+![Deployed Contracts](/images/getting-started/3.copy-contract-address.png)
+
+![Deployed Contracts](/images/getting-started/4.copy-abi.png)
