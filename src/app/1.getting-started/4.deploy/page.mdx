@@ -11,6 +11,7 @@ export const metadata = {
 import CheckList from '@/components/docs/getting-started/wallet/Example'
 import Example from '@/components/docs/getting-started/compiled-and-deploy/example'
 import Example2 from '@/components/docs/getting-started/compiled-and-deploy/example2'
+import Example3 from '@/components/docs/getting-started/compiled-and-deploy/example3'
 import { Card } from '@/components/ui/Card'
 import SolidityContextProvider from '@/context/layzySolidityContext'
 
@@ -45,17 +46,178 @@ Once the contract is compiled, the output will be displayed below.
 
 ## Step 2: Deploy your contract using Remix
 
-First, open remix IDE by visiting [remix.ethereum.org](https://remix.ethereum.org/) and copy the above code into the editor.
-After pasting the code, you can click compile to compile the contract.
+To deploy your smart contract:
 
-![Remix IDE](/images/getting-started/1.remix-tutorial.png)
+1. Visit [Remix IDE](https://remix.ethereum.org/) and paste your contract code into the editor.
+2. Click the "Compile" button to compile your contract.
 
-Next, click on the `Deploy & Run Transactions` tab and select the environment as `Injected provider - MetaMask`. After selecting the environment, you can click on the `Deploy` button to deploy the contract.
+![Remix IDE interface](/images/getting-started/1.remix-tutorial.png)
 
-![Deploy & Run Transactions](/images/getting-started/2.remix-deploy.png)
+3. Navigate to the "Deploy & Run Transactions" tab.
+4. Set the environment to "Injected provider - MetaMask".
+5. Click "Deploy" to deploy your contract.
 
-After deploying the contract, you can copy the contract address and ABI from the `Deployed Contracts` section.
+![Deploy & Run Transactions tab](/images/getting-started/2.remix-deploy.png)
 
-![Deployed Contracts](/images/getting-started/3.copy-contract-address.png)
+After successful deployment, you'll need to copy two crucial pieces of information:
 
-![Deployed Contracts](/images/getting-started/4.copy-abi.png)
+1. The contract address
+2. The contract ABI (Application Binary Interface)
+
+You can find both in the "Deployed Contracts" section.
+
+> [!note]
+> The contract address and ABI are essential for interacting with your deployed contract.
+
+![Copying the contract address](/images/getting-started/3.copy-contract-address.png)
+
+![Copying the contract ABI](/images/getting-started/4.copy-abi.png)
+
+With your contract address and ABI in hand, you can now interact with your deployed contract through the UI. The results should match those from the previous step.
+
+<Example3 />
+
+## Step 3: The code behind the UI
+
+First, you need to install `web3-connect-react` package
+
+```bash
+pnpm install web3-connect-react
+```
+
+Then, you can use the following code to interact with your contract:
+
+```jsx
+'use client'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Loader2, RefreshCw, Trash } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useWallet } from 'web3-connect-react'
+
+export function InteractArea({
+  contractAddress,
+  abi,
+}: {
+  contractAddress: string
+  abi: any
+}) {
+  const [value, setValue] = useState<string>('')
+  const [currentBalance, setCurrentBalance] = useState<string>('')
+  const [isMinting, setIsMinting] = useState<boolean>(false)
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+  // use wallet is a custom hook that returns the sdk and wallet address. You can also use this to sign in and sign out.
+  // this provides you to interact with multiple wallets like metamask, walletconnect, etc on multiple chains.
+  const { sdk, walletAddress } = useWallet()
+
+  useEffect(() => {
+    getBalance()
+  }, [sdk, walletAddress, sdk.provider, contractAddress])
+
+  const getBalance = async () => {
+    if (!walletAddress || !sdk || !sdk.provider || !contractAddress) {
+      return
+    }
+    if (!abi) {
+      return
+    }
+    try {
+      setIsRefreshing(true)
+      const result = await sdk.callContractMethod(
+        contractAddress,
+        abi,
+        'balanceOf',
+        [walletAddress],
+      )
+      setCurrentBalance(result)
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const mint = async () => {
+    if (!walletAddress || !sdk || !sdk.provider || !contractAddress) {
+      return
+    }
+    if (!abi) {
+      return
+    }
+    try {
+      setIsMinting(true)
+      await sdk.callContractMethod(contractAddress, abi, 'mint', [
+        walletAddress,
+        value,
+      ])
+      await getBalance()
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    } finally {
+      setIsMinting(false)
+    }
+  }
+
+  return (
+    <CardContent className="space-y-4">
+      <div className="space-y-2">
+        <label htmlFor="amount" className="text-sm font-medium">
+          Enter an amount
+        </label>
+        <Input
+          id="amount"
+          placeholder="Enter an amount"
+          type="number"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Current balance: {currentBalance}</span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={getBalance}
+          disabled={
+            isRefreshing || !walletAddress || !sdk || !sdk.provider || !abi
+          }
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
+          <span className="sr-only">Refresh balance</span>
+        </Button>
+      </div>
+      <Button
+        className="w-full"
+        onClick={() => mint()}
+        disabled={
+          isMinting ||
+          value.length === 0 ||
+          !walletAddress ||
+          !sdk ||
+          !sdk.provider ||
+          !abi
+        }
+      >
+        {isMinting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Minting...
+          </>
+        ) : (
+          'Mint'
+        )}
+      </Button>
+      <hr />
+      <span className="mt-2 text-xs">
+        Contract Address: <span className="text-xs">{contractAddress}</span>
+      </span>
+    </CardContent>
+  )
+}
+```
