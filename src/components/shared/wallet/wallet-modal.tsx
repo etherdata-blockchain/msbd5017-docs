@@ -39,7 +39,6 @@ function WalletItem({
 
   const { sdk, signIn } = useWallet()
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const onSignIn = useCallback(
     async (provider: AvailableProvider) => {
@@ -50,7 +49,7 @@ function WalletItem({
           if (error) {
             throw new Error(error)
           }
-          router.refresh()
+          window.location.reload()
         },
         getSignInData: async (address, provider) => {
           const message = 'Sign In to MSBD 5017 website'
