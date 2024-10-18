@@ -194,9 +194,9 @@ function NavigationGroup({
       </motion.h2>
       <div className={clsx('relative mt-3 pl-2', level > 0 && 'ml-4')}>
         <AnimatePresence initial={!isInsideMobileNavigation}>
-          {isActiveGroup && (
+          {/* {isActiveGroup && (
             <VisibleSectionHighlight group={group} pathname={pathname} />
-          )}
+          )} */}
         </AnimatePresence>
         <motion.div
           layout

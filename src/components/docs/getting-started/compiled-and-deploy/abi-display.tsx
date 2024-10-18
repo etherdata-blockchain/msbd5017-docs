@@ -4,7 +4,6 @@ import { decodeMetadata } from './utils'
 
 export default function AbiDisplay() {
   const { compilerOutput } = useSolidity()
-  console.log(compilerOutput)
 
   if (!compilerOutput) {
     return <></>
